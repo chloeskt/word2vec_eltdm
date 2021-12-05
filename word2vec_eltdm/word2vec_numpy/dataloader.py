@@ -52,7 +52,7 @@ class DataLoader:
                 X.append(one_hot_encoding(self.vocab[self.tokens[i]], len(self.vocab)))
                 y.append(one_hot_encoding(self.vocab[self.tokens[j]], len(self.vocab)))
 
-            if i % self.batch_size == 1:
+            if i % self.batch_size == 1 or self.batch_size == 1:
                 # TODO: add padding for the first and last `window_size` words
                 yield {"X": np.asarray(X), "y": np.asarray(y)}
                 X, y = [], []
