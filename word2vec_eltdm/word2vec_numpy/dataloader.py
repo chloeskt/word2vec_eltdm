@@ -5,13 +5,13 @@ import numpy as np
 
 class DataLoader:
     def __init__(
-        self,
-        tokens: List[str],
-        vocab: Dict[str, int],
-        window: int,
-        batch_size: int = 1,
-        shuffle: bool = False,
-        drop_last: bool = True,
+            self,
+            tokens: List[str],
+            vocab: Dict[str, int],
+            window: int,
+            batch_size: int = 1,
+            shuffle: bool = False,
+            drop_last: bool = True,
     ) -> None:
         """
         :param tokens: list of strings representing all the tokens in your dataset
@@ -39,24 +39,40 @@ class DataLoader:
 
         X = np.zeros((2 * self.window * self.batch_size, len(self.vocab)))
         y = np.zeros((2 * self.window * self.batch_size, len(self.vocab)))
+        previous_y = np.zeros((2 * self.window, len(self.vocab)))
         index = 0
+        num_batch = 0
         for i in index_iterator:
-            if i % self.batch_size == 0 and (i != 0 or self.batch_size == 1):
+            if i % self.batch_size == 0 and i != 0:
+                num_batch += 1
+                if num_batch % 100 == 0:
+                    print(f"BATCH {num_batch} done")
                 yield {"X": X, "y": y}
                 index = 0
                 X = np.zeros((2 * self.window * self.batch_size, len(self.vocab)))
                 y = np.zeros((2 * self.window * self.batch_size, len(self.vocab)))
 
-            idx = range(
-                max(0, self.window - i),
-                min(len(self.tokens) - i + self.window + 1, self.window * 2),
-            )
-            for delta in idx:
-                X[index + delta, self.vocab[self.tokens[i]]] = 1
-                j = (
-                    i - self.window + delta + (1 if delta >= self.window else 0)
-                )  # min(1, max(0, delta - self.window + 1))
-                y[index + delta, self.vocab[self.tokens[j]]] = 1
+            lower_bound = max(0, self.window - i)
+            upper_bound = min(len(self.tokens) - i + self.window + 1, self.window * 2)
+
+            X[index + lower_bound: index + upper_bound, self.vocab[self.tokens[i]]] = 1
+
+            if i == 0:
+                idx = range(lower_bound, upper_bound)
+                for delta in idx:
+                    X[index + delta, self.vocab[self.tokens[i]]] = 1
+                    j = i - self.window + delta + (1 if delta >= self.window else 0)
+                    y[index + delta, self.vocab[self.tokens[j]]] = 1
+
+            elif i + self.window >= len(self.tokens):
+                y[index: index + upper_bound - 1, :] = previous_y[1:, :]
+
+            else:
+                y[index: index + upper_bound - 1, :] = previous_y[1:, :]
+                j = i - self.window + upper_bound
+                y[index + upper_bound - 1, self.vocab[self.tokens[j]]] = 1
+
+            previous_y = y[index: index + 2 * self.window, :]
 
             index += 2 * self.window
 
@@ -64,7 +80,6 @@ class DataLoader:
             yield {"X": X, "y": y}
 
     def __len__(self) -> int:
-        length = None
         length = (len(self.tokens) // self.batch_size) + 1
 
         if self.drop_last and len(self.tokens) % self.batch_size != 0:
