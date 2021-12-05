@@ -11,11 +11,13 @@ class Preprocessor:
             data = file.read()
         return data
 
-    def _tokenize(self, data: str) -> List[str]:
+    @staticmethod
+    def _tokenize(data: str) -> List[str]:
         pattern = re.compile(r"[A-Za-z]+[\w^\']*|[\w^\']*[A-Za-z]+[\w^\']*")
         return pattern.findall(data.lower())
 
-    def _create_vocab(self, tokens: List[str]) -> Tuple[Dict[str, int], Dict[int, str]]:
+    @staticmethod
+    def _create_vocab(tokens: List[str]) -> Tuple[Dict[str, int], Dict[int, str]]:
         word_to_id = dict()
         id_to_word = dict()
 
