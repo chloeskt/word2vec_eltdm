@@ -2,8 +2,6 @@ from typing import List, Dict, Generator
 
 import numpy as np
 
-from .utils import concatenate, one_hot_encoding
-
 
 class DataLoader:
     def __init__(
@@ -13,7 +11,7 @@ class DataLoader:
         window: int,
         batch_size: int = 1,
         shuffle: bool = False,
-        drop_last: bool = False,
+        drop_last: bool = True,
     ) -> None:
         """
         :param tokens: list of strings representing all the tokens in your dataset
@@ -22,7 +20,7 @@ class DataLoader:
         :param batch_size: how many samples per batch to load
         :param shuffle: set to True to have the data reshuffled at every epoch
         :param drop_last: set to True to drop the last incomplete batch,
-            If the dataset size is not divisible by the batch size.
+            if the dataset size is not divisible by the batch size.
             If False and the size of dataset is not divisible by the batch
             size, then the last batch will be smaller.
         """
@@ -39,26 +37,31 @@ class DataLoader:
         else:
             index_iterator = iter(range(len(self.tokens)))
 
-        X = []
-        y = []
+        X = np.zeros((2 * self.window * self.batch_size, len(self.vocab)))
+        y = np.zeros((2 * self.window * self.batch_size, len(self.vocab)))
+        index = 0
         for i in index_iterator:
-            idx = concatenate(
-                range(max(0, i - self.window), i),
-                range(i, min(len(self.tokens), i + self.window + 1)),
-            )
-            for j in idx:
-                if i == j:
-                    continue
-                X.append(one_hot_encoding(self.vocab[self.tokens[i]], len(self.vocab)))
-                y.append(one_hot_encoding(self.vocab[self.tokens[j]], len(self.vocab)))
+            if i % self.batch_size == 0 and (i != 0 or self.batch_size == 1):
+                yield {"X": X, "y": y}
+                index = 0
+                X = np.zeros((2 * self.window * self.batch_size, len(self.vocab)))
+                y = np.zeros((2 * self.window * self.batch_size, len(self.vocab)))
 
-            if i % self.batch_size == 1 or self.batch_size == 1:
-                # TODO: add padding for the first and last `window_size` words
-                yield {"X": np.asarray(X), "y": np.asarray(y)}
-                X, y = [], []
+            idx = range(
+                max(0, self.window - i),
+                min(len(self.tokens) - i + self.window + 1, self.window * 2),
+            )
+            for delta in idx:
+                X[index + delta, self.vocab[self.tokens[i]]] = 1
+                j = (
+                    i - self.window + delta + (1 if delta >= self.window else 0)
+                )  # min(1, max(0, delta - self.window + 1))
+                y[index + delta, self.vocab[self.tokens[j]]] = 1
+
+            index += 2 * self.window
 
         if not self.drop_last and X:
-            yield {"X": np.asarray(X), "y": np.asarray(y)}
+            yield {"X": X, "y": y}
 
     def __len__(self) -> int:
         length = None
