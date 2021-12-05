@@ -1,4 +1,4 @@
-from typing import List, Dict
+from typing import List, Dict, Generator
 
 import numpy as np
 
@@ -14,12 +14,15 @@ class DataLoader:
         batch_size: int = 1,
         shuffle: bool = False,
         drop_last: bool = False,
-    ):
+    ) -> None:
         """
+        :param tokens: list of strings representing all the tokens in your dataset
+        :param vocab: vocabulary dictionary Dict[token, id]
+        :param window: how many tokens you should consider around each token (continuous Skip-gram)
         :param batch_size: how many samples per batch to load
         :param shuffle: set to True to have the data reshuffled at every epoch
         :param drop_last: set to True to drop the last incomplete batch,
-            if the dataset size is not divisible by the batch size.
+            If the dataset size is not divisible by the batch size.
             If False and the size of dataset is not divisible by the batch
             size, then the last batch will be smaller.
         """
@@ -30,7 +33,7 @@ class DataLoader:
         self.shuffle = shuffle
         self.drop_last = drop_last
 
-    def __iter__(self):
+    def __iter__(self) -> Generator:
         if self.shuffle:
             index_iterator = iter(np.random.permutation(len(self.tokens)))
         else:
@@ -57,7 +60,7 @@ class DataLoader:
         if not self.drop_last and X:
             yield {"X": np.asarray(X), "y": np.asarray(y)}
 
-    def __len__(self):
+    def __len__(self) -> int:
         length = None
         length = (len(self.tokens) // self.batch_size) + 1
 
