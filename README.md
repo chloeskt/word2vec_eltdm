@@ -5,7 +5,7 @@ and [Matthieu Durut](https://www.linkedin.com/in/matthieudurut) at ENSAE ParisTe
 
 ## About this project
 
-The idea is to implement a naïve version of the [Word2Vec algorithm](https://arxiv.org/abs/1301.3781) developed by Mikolov et al.
+The idea is to implement a naïve version (using continuous Skip-gram) of the [Word2Vec algorithm](https://arxiv.org/abs/1301.3781) developed by Mikolov et al.
 This will be done in Python, using Numpy library. And compare this naïve version to a faster and more scalable version, inspired 
 by the work of Ji & al, in their paper ["Parallelizing Word2Vec in Shared and Distributed Memory"](https://arxiv.org/abs/1604.04661).
 Our implementation will be based on Pytorch and we shall compare the performances of the two algorithms in terms of training speed, 
