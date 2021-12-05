@@ -20,6 +20,27 @@ NVIDIA GeForce RTX 3080 (10GB VRAM).
 pip install -r requirements.txt
 ````
 
+## Data
+
+For this project, we used the same data as in ["Parallelizing Word2Vec in Shared and Distributed Memory"](https://arxiv.org/abs/1604.04661).
+One can retrieve them by running:
+```bash
+cd data
+wget http://mattmahoney.net/dc/text8.zip -O text8.gz
+gzip -d text8.gz -f
+```
+and
+```bash
+cd data
+wget http://www.statmt.org/lm-benchmark/1-billion-word-language-modeling-benchmark-r13output.tar.gz
+tar xvzf 1-billion-word-language-modeling-benchmark-r13output.tar.gz
+cat 1-billion-word-language-modeling-benchmark-r13output/heldout-monolingual.tokenized.shuffled/news.en-00000-of-00100 > 1b
+cat 1-billion-word-language-modeling-benchmark-r13output/training-monolingual.tokenized.shuffled/* >> 1b
+rm -rf 1-billion-word-language-modeling-benchmark-r13output
+```
+
+The previous code has been taken from Ji et al. work and can be found in the corresponding [repository](https://github.com/IntelLabs/pWord2Vec/tree/master/data).
+
 ## References
 
 ["Parallelizing Word2Vec in Shared and Distributed Memory"](https://arxiv.org/abs/1604.04661) by Ji. et al.
