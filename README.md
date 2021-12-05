@@ -11,7 +11,7 @@ by the work of Ji & al, in their paper ["Parallelizing Word2Vec in Shared and Di
 Our implementation will be based on Pytorch and we shall compare the performances of the two algorithms in terms of training speed, 
 inference time, parallel schemes, number of threads used, etc. 
 
-All evaluations will be run on the same machine with 8 cores/16 threads (Intel(R) Core(TM) i7-10700K CPU @ 3.80GHz) and one 
+All evaluations will be run on the same machine with 8 cores/16 threads (Intel(R) Core(TM) i7-10700K CPU @ 3.80GHz), 32GB of RAM and one 
 NVIDIA GeForce RTX 3080 (10GB VRAM).
 
 ## Installation 
