@@ -1,8 +1,10 @@
 from collections import Counter
 import random
-from typing import Dict, Tuple
+from typing import Dict, Tuple, List
 
 import numpy as np
+
+random.seed(0)
 
 
 class Subsampler:
@@ -22,24 +24,28 @@ class Subsampler:
         self,
         words_to_id: Dict[str, int],
         id_to_words: Dict[int, str],
+        tokens: List[str],
         threshold: float = 1e-5,
     ) -> None:
         self.threshold = threshold
+        self.tokens = tokens
         self.words_to_id = words_to_id
         self.id_to_words = id_to_words
 
-    def subsample(self) -> Tuple[Dict[str, int], Dict[int, str]]:
-        id_counts = Counter(self.words_to_id.values())
-        total_id_count = len(self.words_to_id.values())
-        freqs = {index: count / total_id_count for index, count in id_counts.items()}
+    def subsample(self) -> Tuple[List[str], Dict[str, int], Dict[int, str]]:
+        token_counts = Counter(self.tokens)
+        total_token_count = len(self.tokens)
+        freqs = {
+            token: count / total_token_count for token, count in token_counts.items()
+        }
         drop_proba = {
-            index: 1 - np.sqrt(self.threshold / freqs[index]) for index in id_counts
+            token: 1 - np.sqrt(self.threshold / freqs[token]) for token in token_counts
         }
         # keep tokens with proba (1 - drop_proba)
-        id_to_words = {
-            index: token
-            for index, token in self.id_to_words.items()
-            if random.random() < (1 - drop_proba[index])
-        }
-        words_to_id = {token: index for index, token in id_to_words.items()}
-        return words_to_id, id_to_words
+        tokens_to_keep = [
+            token for token in self.tokens if random.random() < (1 - drop_proba[token])
+        ]
+        # recreate vocab
+        words_to_id = {token: self.words_to_id[token] for token in tokens_to_keep}
+        id_to_words = {index: token for token, index in words_to_id.items()}
+        return tokens_to_keep, words_to_id, id_to_words
