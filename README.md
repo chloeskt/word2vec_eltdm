@@ -20,6 +20,11 @@ NVIDIA GeForce RTX 3080 (10GB VRAM).
 pip install -r requirements.txt
 ````
 
+To download files relevant for our word2vec.
+```
+python3 -m nltk.downloader stopwords
+```
+
 ## Data
 
 For this project, we used the same data as in ["Parallelizing Word2Vec in Shared and Distributed Memory"](https://arxiv.org/abs/1604.04661).
