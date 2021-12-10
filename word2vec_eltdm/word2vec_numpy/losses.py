@@ -1,14 +1,29 @@
+import numpy as np
+
+
 class Loss(object):
     def __init__(self):
         self.grad_history = []
 
-    def forward(self, y_out, y_truth):
+    def forward(self, preds, y):
         return NotImplementedError
 
-    def backward(self, y_out, y_truth, upstream_grad=1.0):
+    def backward(self, preds, y):
         return NotImplementedError
 
-    def __call__(self, y_out, y_truth):
-        loss = self.forward(y_out, y_truth)
-        grad = self.backward(y_out, y_truth)
+    def __call__(self, preds, y):
+        loss = self.forward(preds, y)
+        grad = self.backward(preds, y)
         return loss, grad
+
+
+class CrossEntropy(Loss):
+    def __init__(self):
+        super(CrossEntropy).__init__()
+        self.cache = {}
+
+    def forward(self, preds, y):
+        return -np.sum(np.log(preds) * y)
+
+    def backward(self, preds, y):
+        return preds - y

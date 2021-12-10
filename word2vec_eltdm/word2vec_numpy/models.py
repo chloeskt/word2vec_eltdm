@@ -2,8 +2,10 @@ from typing import Dict
 
 import numpy as np
 
+from word2vec_eltdm.word2vec_numpy.base_network import Network
 
-class SimpleWord2Vec:
+
+class SimpleWord2Vec(Network):
     """
     Very basic implementation of Word2Vec without any "speed" tricks.
     1. Create embeddings
@@ -20,7 +22,7 @@ class SimpleWord2Vec:
 
     def __init__(
         self,
-        vocab: Dict[str, int],
+        len_vocab: int,
         num_layer: int = 1,
         hidden_size: int = 500,
         embedding_size: int = 300,
@@ -28,7 +30,8 @@ class SimpleWord2Vec:
         alpha: float = 0.001,
         learning_rate: float = 1e-3,
     ):
-        self.vocab = vocab
+        super(SimpleWord2Vec, self).__init__("SimpleWord2Vec")
+        self.len_vocab = len_vocab
         self.num_layer = num_layer
         self.hidden_size = hidden_size
         self.embedding_size = embedding_size
@@ -40,53 +43,47 @@ class SimpleWord2Vec:
     def initialize_weights(self, W1: np.array = None, W2: np.array = None):
         if W1 and W2:
             assert W1.shape == (
-                len(self.vocab),
+                len(self.len_vocab),
                 self.embedding_size,
-            ), "weights for initialization are not in the correct shape (len(self.vocab), self.embedding_size)"
+            ), "weights for initialization are not in the correct shape (len(self.len_vocab), self.embedding_size)"
             assert W2.shape == (
-                len(self.vocab),
+                len(self.len_vocab),
                 self.embedding_size,
-            ), "weights for initialization are not in the correct shape (self.embedding_size, len(self.vocab))"
+            ), "weights for initialization are not in the correct shape (self.embedding_size, len(self.len_vocab))"
             self.W1 = W1
             self.W2 = W2
 
         else:
-            self.W1 = self.alpha * np.random.randn(len(self.vocab), self.embedding_size)
-            self.W2 = self.alpha * np.random.randn(self.embedding_size, len(self.vocab))
+            self.W1 = self.alpha * np.random.randn(len(self.len_vocab), self.embedding_size)
+            self.W2 = self.alpha * np.random.randn(self.embedding_size, len(self.len_vocab))
 
     def forward(self, X):
         assert self.W1 is not None, "weight matrix W1 is not initialized"
         assert self.W2 is not None, "weight matrix W2 is not initialized"
 
-        h = X.dot(self.W1)
-        u = h.dot(self.W2)
-        y = self.softmax(h)
+        h = X @ self.W1
+        u = h @ self.W2
+        y = self.softmax(u)
         self.cache["X"] = X
         self.cache["h"] = h
         self.cache["logits"] = u
 
         return y
 
-    def backward(self, preds, y):
-        grad_softmax = self.softmax_backward(y, preds)
-        grad_W1, grad_W2 = self.hidden_layer_backward(grad_softmax)
-        self.update_weights(grad_W1, grad_W2)
-
-    def update_weights(self, grad_W1, grad_W2):
-        self.W1 = self.W1 - (self.learning_rate * grad_W1)
-        self.W2 = self.W2 - (self.learning_rate * grad_W2)
+    def update_weights(self, dW1, dW2):
+        self.W1 -= self.learning_rate * dW1
+        self.W2 -= self.learning_rate * dW2
 
     @staticmethod
     def softmax(X):
-        e_x = np.exp(X - np.max(X))
-        return e_x / e_x.sum(axis=0)
+        # careful X is a matrix (2*window*batch_size, len(self.len_vocab))
+        preds = []
+        for x in X:
+            exp = np.exp(x - np.max(x))
+            preds.append(exp / exp.sum(axis=0))
+        return np.asarray(preds)
 
-    @staticmethod
-    def softmax_backward(y, preds):
-        grad_softmax = preds - y
-        return grad_softmax
-
-    def hidden_layer_backward(self, grad_softmax):
-        grad_W1 = np.dot(self.cache["X"], np.dot(self.W2, grad_softmax).T)
-        grad_W2 = np.dot(self.cache["h"], grad_softmax)
-        return grad_W1, grad_W2
+    def backward(self, grad_softmax):
+        dW2 = self.cache["h"].T @ grad_softmax
+        dW1 = self.cache["X"].T @ (grad_softmax @ self.W2.T)
+        return dW1, dW2

@@ -1,6 +1,6 @@
-from collections import Counter
 import random
-from typing import Dict, Tuple, List
+from collections import Counter
+from typing import List
 
 import numpy as np
 
@@ -23,16 +23,14 @@ class Subsampler:
     """
 
     def __init__(
-        self,
-        dataset: Dataset,
-        threshold: float = 1e-5,
+            self,
+            tokens: List[str],
+            threshold: float = 1e-5,
     ) -> None:
         self.threshold = threshold
-        self.tokens = dataset.tokens
-        self.words_to_id = dataset.tokens_to_id
-        self.id_to_words = dataset.id_to_tokens
+        self.tokens = tokens
 
-    def subsample(self) -> Dataset:
+    def subsample(self) -> List[str]:
         token_counts = Counter(self.tokens)
         total_token_count = len(self.tokens)
         freqs = {
@@ -45,8 +43,5 @@ class Subsampler:
         tokens_to_keep = [
             token for token in self.tokens if random.random() < (1 - drop_proba[token])
         ]
-        # recreate vocab
-        words_to_id = {token: self.words_to_id[token] for token in tokens_to_keep}
-        id_to_words = {index: token for token, index in words_to_id.items()}
 
-        return Dataset(tokens_to_keep, words_to_id, id_to_words)
+        return tokens_to_keep
