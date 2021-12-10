@@ -4,6 +4,8 @@ from typing import Dict, Tuple, List
 
 import numpy as np
 
+from word2vec_eltdm.word2vec_numpy.dataset import Dataset
+
 random.seed(0)
 
 
@@ -22,17 +24,15 @@ class Subsampler:
 
     def __init__(
         self,
-        words_to_id: Dict[str, int],
-        id_to_words: Dict[int, str],
-        tokens: List[str],
+        dataset: Dataset,
         threshold: float = 1e-5,
     ) -> None:
         self.threshold = threshold
-        self.tokens = tokens
-        self.words_to_id = words_to_id
-        self.id_to_words = id_to_words
+        self.tokens = dataset.tokens
+        self.words_to_id = dataset.tokens_to_id
+        self.id_to_words = dataset.id_to_tokens
 
-    def subsample(self) -> Tuple[List[str], Dict[str, int], Dict[int, str]]:
+    def subsample(self) -> Dataset:
         token_counts = Counter(self.tokens)
         total_token_count = len(self.tokens)
         freqs = {
@@ -48,4 +48,5 @@ class Subsampler:
         # recreate vocab
         words_to_id = {token: self.words_to_id[token] for token in tokens_to_keep}
         id_to_words = {index: token for token, index in words_to_id.items()}
-        return tokens_to_keep, words_to_id, id_to_words
+
+        return Dataset(tokens_to_keep, words_to_id, id_to_words)
