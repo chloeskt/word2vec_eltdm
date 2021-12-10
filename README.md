@@ -51,3 +51,7 @@ The previous code has been taken from Ji et al. work and can be found in the cor
 ["Parallelizing Word2Vec in Shared and Distributed Memory"](https://arxiv.org/abs/1604.04661) by Ji. et al.
 
 Their code has be found [here](https://github.com/IntelLabs/pWord2Vec).
+
+[Distributed Representations of Words and Phrases and their Compositionality](https://proceedings.neurips.cc/paper/2013/file/9aa42b31882ec039965f3c4923ce901b-Paper.pdf) by Mikolov et al. 
+
+[Efficient Estimation of Words Representations in Vector Space](https://arxiv.org/pdf/1301.3781.pdf) by Mikolov et al. 
