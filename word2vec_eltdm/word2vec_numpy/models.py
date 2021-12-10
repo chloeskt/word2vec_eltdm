@@ -14,18 +14,12 @@ class SimpleWord2Vec(Network):
         num_layer: int = 1,
         hidden_size: int = 500,
         embedding_size: int = 300,
-        window: int = 5,
-        alpha: float = 0.001,
-        learning_rate: float = 1e-3,
     ):
         super(SimpleWord2Vec, self).__init__("SimpleWord2Vec")
         self.len_vocab = len_vocab
         self.num_layer = num_layer
         self.hidden_size = hidden_size
         self.embedding_size = embedding_size
-        self.window = window
-        self.alpha = alpha
-        self.learning_rate = learning_rate
         self.cache = {}
         self.best_val_loss = None
         self.best_W1 = None
@@ -45,12 +39,12 @@ class SimpleWord2Vec(Network):
             self.W2 = W2
 
         else:
-            self.W1 = self.alpha * np.random.normal(
+            self.W1 = np.random.normal(
                 loc=0.0,
                 scale=1 / np.sqrt(self.embedding_size),
                 size=(self.len_vocab, self.embedding_size),
             )
-            self.W2 = self.alpha * np.random.normal(
+            self.W2 = np.random.normal(
                 loc=0.0,
                 scale=1 / np.sqrt(self.embedding_size),
                 size=(self.embedding_size, self.len_vocab),
@@ -68,10 +62,6 @@ class SimpleWord2Vec(Network):
         self.cache["logits"] = u
 
         return y
-
-    def update_weights(self, dW1, dW2):
-        self.W1 -= self.learning_rate * dW1
-        self.W2 -= self.learning_rate * dW2
 
     @staticmethod
     def softmax(X):
