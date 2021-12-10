@@ -3,6 +3,7 @@ from typing import List, Tuple, Dict
 
 UNKNOWN_TOKEN = "UKN"
 
+
 class VocabCreator:
     @staticmethod
     def create_vocab(tokens: List[str]) -> Tuple[Dict[str, int], Dict[int, str]]:

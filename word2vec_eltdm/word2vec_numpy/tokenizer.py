@@ -15,17 +15,17 @@ class Tokenizer:
         pattern = re.compile(r"[A-Za-z]+[\w^\']*|[\w^\']*[A-Za-z]+[\w^\']*")
 
         data = self._get_data().lower()
-            # .replace('.', ' <PERIOD> ')\
-            # .replace(',', ' <COMMA> ')\
-            # .replace('"', ' <QUOTATION_MARK> ')\
-            # .replace(';', ' <SEMICOLON> ')\
-            # .replace('!', ' <EXCLAMATION_MARK> ')\
-            # .replace('?', ' <QUESTION_MARK> ')\
-            # .replace('(', ' <LEFT_PAREN> ')\
-            # .replace(')', ' <RIGHT_PAREN> ')\
-            # .replace('--', ' <HYPHENS> ')\
-            # .replace('?', ' <QUESTION_MARK> ')\
-            # .replace('\n', ' <NEW_LINE> ')\
-            # .replace(':', ' <COLON> ')
+        # .replace('.', ' <PERIOD> ')\
+        # .replace(',', ' <COMMA> ')\
+        # .replace('"', ' <QUOTATION_MARK> ')\
+        # .replace(';', ' <SEMICOLON> ')\
+        # .replace('!', ' <EXCLAMATION_MARK> ')\
+        # .replace('?', ' <QUESTION_MARK> ')\
+        # .replace('(', ' <LEFT_PAREN> ')\
+        # .replace(')', ' <RIGHT_PAREN> ')\
+        # .replace('--', ' <HYPHENS> ')\
+        # .replace('?', ' <QUESTION_MARK> ')\
+        # .replace('\n', ' <NEW_LINE> ')\
+        # .replace(':', ' <COLON> ')
 
         return pattern.findall(data)

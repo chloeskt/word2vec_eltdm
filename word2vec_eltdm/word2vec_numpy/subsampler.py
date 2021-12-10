@@ -4,8 +4,6 @@ from typing import List
 
 import numpy as np
 
-from word2vec_eltdm.word2vec_numpy.dataset import Dataset
-
 random.seed(0)
 
 
@@ -23,9 +21,9 @@ class Subsampler:
     """
 
     def __init__(
-            self,
-            tokens: List[str],
-            threshold: float = 1e-5,
+        self,
+        tokens: List[str],
+        threshold: float = 1e-5,
     ) -> None:
         self.threshold = threshold
         self.tokens = tokens

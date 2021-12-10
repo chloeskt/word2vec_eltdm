@@ -1,4 +1,4 @@
-from typing import Dict, Tuple, List
+from typing import List
 
 from word2vec_eltdm.word2vec_numpy import Tokenizer, VocabCreator
 from word2vec_eltdm.word2vec_numpy.dataset import Dataset

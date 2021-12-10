@@ -8,13 +8,13 @@ from word2vec_eltdm.word2vec_numpy.vocabcreator import UNKNOWN_TOKEN
 
 class DataLoader:
     def __init__(
-            self,
-            dataset: Dataset,
-            tokens: List[str],
-            window: int,
-            batch_size: int = 1,
-            shuffle: bool = False,
-            drop_last: bool = True,
+        self,
+        dataset: Dataset,
+        tokens: List[str],
+        window: int,
+        batch_size: int = 1,
+        shuffle: bool = False,
+        drop_last: bool = True,
     ) -> None:
         """
         :param dataset: dataset
@@ -48,19 +48,28 @@ class DataLoader:
             lower_bound = max(0, self.window - i)
             upper_bound = min(len(self.tokens) - i + self.window + 1, self.window * 2)
 
-            X[index + lower_bound: index + upper_bound, self.vocab.get(self.tokens[i], self.vocab[UNKNOWN_TOKEN])] = 1
-            y[index: index + 2 * self.window - 1, :] = previous_y[1:, :]
+            X[
+                index + lower_bound : index + upper_bound,
+                self.vocab.get(self.tokens[i], self.vocab[UNKNOWN_TOKEN]),
+            ] = 1
+            y[index : index + 2 * self.window - 1, :] = previous_y[1:, :]
 
             if i == 0:
                 idx = range(lower_bound, upper_bound)
                 for delta in idx:
                     j = i - self.window + delta + 1
-                    y[index + delta, self.vocab.get(self.tokens[j], self.vocab[UNKNOWN_TOKEN])] = 1
+                    y[
+                        index + delta,
+                        self.vocab.get(self.tokens[j], self.vocab[UNKNOWN_TOKEN]),
+                    ] = 1
             elif i + self.window < len(self.tokens):
                 j = i + self.window
-                y[index + 2 * self.window - 1, self.vocab.get(self.tokens[j], self.vocab[UNKNOWN_TOKEN])] = 1
+                y[
+                    index + 2 * self.window - 1,
+                    self.vocab.get(self.tokens[j], self.vocab[UNKNOWN_TOKEN]),
+                ] = 1
 
-            previous_y = y[index: index + 2 * self.window, :]
+            previous_y = y[index : index + 2 * self.window, :]
 
             index += 2 * self.window
 
