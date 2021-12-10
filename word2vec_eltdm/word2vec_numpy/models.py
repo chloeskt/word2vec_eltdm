@@ -11,13 +11,11 @@ class SimpleWord2Vec(Network):
     def __init__(
         self,
         len_vocab: int,
-        num_layer: int = 1,
         hidden_size: int = 500,
         embedding_size: int = 300,
     ):
         super(SimpleWord2Vec, self).__init__("SimpleWord2Vec")
         self.len_vocab = len_vocab
-        self.num_layer = num_layer
         self.hidden_size = hidden_size
         self.embedding_size = embedding_size
         self.cache = {}

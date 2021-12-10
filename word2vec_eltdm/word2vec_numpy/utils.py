@@ -4,7 +4,7 @@ from tqdm.notebook import tqdm
 def train(model, dataloader, criterion, optimizer):
     model.train()
     train_loss = 0.0
-    for batch_idx, batch in tqdm(enumerate(dataloader)):
+    for batch in tqdm(dataloader):
         X, y = batch["X"], batch["y"]
         preds = model.forward(X)
         loss, dy = criterion(preds, y)
@@ -27,7 +27,7 @@ def update_best_loss(model, val_loss):
 def validate(model, dataloader, criterion):
     model.eval()
     validation_loss = 0
-    for batch_idx, batch in tqdm(enumerate(dataloader)):
+    for batch in tqdm(dataloader):
         X, y = batch["X"], batch["y"]
         preds, _ = model(X)
         loss, _ = criterion(preds, y)
