@@ -13,6 +13,14 @@ def train(model, dataloader, criterion, optimizer):
     return train_loss
 
 
+def update_best_loss(model, val_loss):
+    # Update the model and best loss if we see improvements.
+    if not model.best_val_loss or val_loss < model.best_val_loss:
+        model.best_val_loss = val_loss
+        model.best_W1 = model.W1
+        model.best_W2 = model.W2
+
+
 def validate(model, dataloader, criterion):
     model.eval()
     validation_loss = 0
@@ -23,4 +31,8 @@ def validate(model, dataloader, criterion):
         validation_loss += loss
 
     validation_loss /= len(dataloader)
+
+    # Keep track of the best model
+    update_best_loss(model, validation_loss)
+
     return validation_loss

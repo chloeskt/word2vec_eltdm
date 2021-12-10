@@ -27,6 +27,9 @@ class SimpleWord2Vec(Network):
         self.alpha = alpha
         self.learning_rate = learning_rate
         self.cache = {}
+        self.best_val_loss = None
+        self.best_W1 = None
+        self.best_W2 = None
 
     def initialize_weights(self, W1: np.array = None, W2: np.array = None):
         if W1 and W2:
