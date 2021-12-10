@@ -42,8 +42,16 @@ class SimpleWord2Vec(Network):
             self.W2 = W2
 
         else:
-            self.W1 = self.alpha * np.random.randn(self.len_vocab, self.embedding_size)
-            self.W2 = self.alpha * np.random.randn(self.embedding_size, self.len_vocab)
+            self.W1 = self.alpha * np.random.normal(
+                loc=0.0,
+                scale=1 / np.sqrt(self.embedding_size),
+                size=(self.len_vocab, self.embedding_size),
+            )
+            self.W2 = self.alpha * np.random.normal(
+                loc=0.0,
+                scale=1 / np.sqrt(self.embedding_size),
+                size=(self.embedding_size, self.len_vocab),
+            )
 
     def forward(self, X):
         assert self.W1 is not None, "weight matrix W1 is not initialized"
