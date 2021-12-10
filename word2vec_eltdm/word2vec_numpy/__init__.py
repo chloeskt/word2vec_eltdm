@@ -7,3 +7,4 @@ from .subsampler import Subsampler
 from .models import SimpleWord2Vec
 from .optimizers import Optimizer
 from .losses import CrossEntropy
+from .utils import train, validate
