@@ -8,9 +8,7 @@ class Optimizer:
         self.learning_rate = learning_rate
 
     def step(self, dW1, dW2):
-        # dW2 = self.model.cache["h"].T @ dy
-        # dW1 = self.model.cache["X"].T @ (dy @ self.model.W2.T)
-        self.model.W1 -= self.learning_rate * dW1
+        self.model.W1[self.model.cache["X"].flatten(), :] -= self.learning_rate * dW1.T
         self.model.W2 -= self.learning_rate * dW2
 
 
