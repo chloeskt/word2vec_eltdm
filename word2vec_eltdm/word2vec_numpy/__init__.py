@@ -4,7 +4,7 @@ from .dataloader import DataLoader
 from .token_cleaner import TokenCleaner
 from .preprocessor import Preprocessor
 from .subsampler import Subsampler
-from .models import SimpleWord2Vec
-from .optimizers import Optimizer
-from .losses import CrossEntropy
+from .models import SimpleWord2Vec, NegWord2Vec
+from .optimizers import Optimizer, OptimizeNSL
+from .losses import CrossEntropy, NegativeSamplingLoss
 from .utils import train, validate
