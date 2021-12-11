@@ -32,7 +32,9 @@ class DataLoader:
         self.batch_size = batch_size
         self.shuffle = shuffle
         self.drop_last = drop_last
-        self.tokens_in_int = [self.vocab.get(token, self.vocab[UNKNOWN_TOKEN]) for token in self.tokens]
+        self.tokens_in_int = [
+            self.vocab.get(token, self.vocab[UNKNOWN_TOKEN]) for token in self.tokens
+        ]
 
     def __iter__(self) -> Generator:
         index_iterator = iter(range(len(self.tokens)))
@@ -47,11 +49,19 @@ class DataLoader:
             X.extend([x] * len(y))
 
             if (i + 1) % self.batch_size == 0:
+                X = np.array(X)
+                Y = np.array(Y)
+                X = np.expand_dims(X, axis=0)
+                Y = np.expand_dims(Y, axis=0)
                 yield {"X": X, "Y": Y}
                 X = []
                 Y = []
 
         if not self.drop_last and X:
+            X = np.array(X)
+            Y = np.array(Y)
+            X = np.expand_dims(X, axis=0)
+            Y = np.expand_dims(Y, axis=0)
             yield {"X": X, "Y": Y}
 
     def __len__(self) -> int:
@@ -65,6 +75,6 @@ class DataLoader:
         R = np.random.randint(1, self.window + 1)
         start = idx - R if (idx - R) > 0 else 0
         stop = idx + R
-        target_ints = tokens_in_int[start:idx] + tokens_in_int[idx + 1:stop + 1]
+        target_ints = tokens_in_int[start:idx] + tokens_in_int[idx + 1 : stop + 1]
 
         return list(target_ints)
