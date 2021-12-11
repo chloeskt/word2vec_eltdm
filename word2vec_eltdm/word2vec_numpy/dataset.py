@@ -9,3 +9,4 @@ class Dataset:
     test_tokens: List[str]
     tokens_to_id: Dict[str, int] = field(default_factory=dict)
     id_to_tokens: Dict[int, str] = field(default_factory=dict)
+    frequencies: Dict[str, float] = field(default_factory=dict)

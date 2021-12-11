@@ -1,8 +1,10 @@
 import random
 from collections import Counter
-from typing import List
+from typing import List, Tuple, Dict
 
 import numpy as np
+
+from word2vec_eltdm.word2vec_numpy.vocabcreator import UNKNOWN_TOKEN
 
 random.seed(0)
 
@@ -28,7 +30,7 @@ class Subsampler:
         self.threshold = threshold
         self.tokens = tokens
 
-    def subsample(self) -> List[str]:
+    def subsample(self) -> Tuple[List[str], Dict[str, float]]:
         token_counts = Counter(self.tokens)
         total_token_count = len(self.tokens)
         freqs = {
@@ -37,9 +39,10 @@ class Subsampler:
         drop_proba = {
             token: 1 - np.sqrt(self.threshold / freqs[token]) for token in token_counts
         }
+        freqs[UNKNOWN_TOKEN] = 0
         # keep tokens with proba (1 - drop_proba)
         tokens_to_keep = [
             token for token in self.tokens if random.random() < (1 - drop_proba[token])
         ]
 
-        return tokens_to_keep
+        return tokens_to_keep, freqs
