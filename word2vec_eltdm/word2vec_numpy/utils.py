@@ -5,7 +5,7 @@ def train(model, train_dataloader, val_dataloader, criterion, optimizer):
     train_loss = 0.0
     for i, batch in enumerate(tqdm(train_dataloader)):
         model.train()
-        X, y = batch["X"], batch["y"]
+        X, y = batch["X"], batch["Y"]
         preds = model.forward(X)
         loss, dy = criterion(preds, y)
         dW1, dW2 = model.backward(dy)
@@ -34,7 +34,7 @@ def validate(model, dataloader, criterion):
     model.eval()
     validation_loss = 0
     for i, batch in enumerate(tqdm(dataloader)):
-        X, y = batch["X"], batch["y"]
+        X, y = batch["X"], batch["Y"]
         preds, _ = model(X)
         loss, _ = criterion(preds, y)
         validation_loss += loss
