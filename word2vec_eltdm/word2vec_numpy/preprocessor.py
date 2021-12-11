@@ -11,13 +11,15 @@ class Preprocessor:
         tokenizer: Tokenizer,
         token_cleaner: TokenCleaner,
         vocab_creator: VocabCreator,
+        ratio: float
     ) -> None:
         self.tokenizer = tokenizer
         self.token_cleaner = token_cleaner
         self.vocab_creator = vocab_creator
+        self.ratio = ratio
 
     def preprocess(self) -> Dataset:
-        tokens = self.tokenizer.get_tokens()
+        tokens = self.tokenizer.get_tokens(ratio=self.ratio)
         tokens = self.token_cleaner.clean_tokens(tokens)
 
         dataset = self._get_train_val_test(tokens)
@@ -30,10 +32,10 @@ class Preprocessor:
 
     def _get_train_val_test(self, tokens: List[str]) -> Dataset:
         N = len(tokens)
-        # 3/4 train, 1/8 val, 1/8 test
-        train_size = (3 * N) // 4
+        # 4/5 train, 1/10 val, 1/10 test
+        train_size = (4 * N) // 5
         train_tokens = tokens[:train_size]
-        val_size = (7 * N) // 8
+        val_size = (9 * N) // 10
         val_tokens = tokens[train_size:val_size]
         test_tokens = tokens[val_size:]
 

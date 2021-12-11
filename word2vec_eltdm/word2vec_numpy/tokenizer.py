@@ -11,7 +11,7 @@ class Tokenizer:
             data = file.read()
         return data
 
-    def get_tokens(self) -> List[str]:
+    def get_tokens(self, ratio: float = 1) -> List[str]:
         pattern = re.compile(r"[A-Za-z]+[\w^\']*|[\w^\']*[A-Za-z]+[\w^\']*")
 
         data = self._get_data().lower()
@@ -28,4 +28,6 @@ class Tokenizer:
         # .replace('\n', ' <NEW_LINE> ')\
         # .replace(':', ' <COLON> ')
 
-        return pattern.findall(data)
+        tokens = pattern.findall(data)
+        id_to_keep = int(ratio*len(tokens))
+        return tokens[:id_to_keep]
