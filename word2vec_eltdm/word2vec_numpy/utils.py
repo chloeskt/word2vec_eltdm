@@ -1,10 +1,10 @@
 from tqdm.notebook import tqdm
 
 
-def train(model, dataloader, criterion, optimizer):
-    model.train()
+def train(model, train_dataloader, val_dataloader, criterion, optimizer):
     train_loss = 0.0
-    for batch in tqdm(dataloader):
+    for i, batch in enumerate(tqdm(train_dataloader)):
+        model.train()
         X, y = batch["X"], batch["y"]
         preds = model.forward(X)
         loss, dy = criterion(preds, y)
@@ -12,8 +12,14 @@ def train(model, dataloader, criterion, optimizer):
         optimizer.step(dW1, dW2)
         train_loss += loss
 
-    train_loss /= len(dataloader)
-    return train_loss
+        if i % 1500 == 0:
+            print(
+                "Current Training Loss {:.6}".format(loss)
+            )
+            validation_loss = validate(model, val_dataloader, criterion)
+
+    train_loss /= len(train_dataloader)
+    return train_loss, validation_loss
 
 
 def update_best_loss(model, val_loss):
@@ -27,15 +33,22 @@ def update_best_loss(model, val_loss):
 def validate(model, dataloader, criterion):
     model.eval()
     validation_loss = 0
-    for batch in tqdm(dataloader):
+    for i, batch in enumerate(tqdm(dataloader)):
         X, y = batch["X"], batch["y"]
         preds, _ = model(X)
         loss, _ = criterion(preds, y)
         validation_loss += loss
 
+        # if i % 1500 == 0:
+        #     print(
+        #         "Current Validation Loss {:.6}".format(loss)
+        #     )
+
     validation_loss /= len(dataloader)
 
     # Keep track of the best model
     update_best_loss(model, validation_loss)
+
+    print("Validation Loss: ", validation_loss)
 
     return validation_loss
