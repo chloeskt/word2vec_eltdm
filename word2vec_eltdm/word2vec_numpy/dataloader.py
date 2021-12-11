@@ -32,56 +32,27 @@ class DataLoader:
         self.batch_size = batch_size
         self.shuffle = shuffle
         self.drop_last = drop_last
+        self.tokens_in_int = [self.vocab.get(token, self.vocab[UNKNOWN_TOKEN]) for token in self.tokens]
 
     def __iter__(self) -> Generator:
-        if self.shuffle:
-            index_iterator = iter(np.random.permutation(len(self.tokens)))
-        else:
-            index_iterator = iter(range(len(self.tokens)))
+        index_iterator = iter(range(len(self.tokens)))
 
-        X = np.zeros((2 * self.window * self.batch_size, len(self.vocab)))
-        y = np.zeros((2 * self.window * self.batch_size, len(self.vocab)))
-        previous_y = np.zeros((2 * self.window, len(self.vocab)))
-        index = 0
-        num_batch = 0
+        X = []
+        Y = []
+
         for i in index_iterator:
-            lower_bound = max(0, self.window - i)
-            upper_bound = min(len(self.tokens) - i + self.window + 1, self.window * 2)
-
-            X[
-                index + lower_bound : index + upper_bound,
-                self.vocab.get(self.tokens[i], self.vocab[UNKNOWN_TOKEN]),
-            ] = 1
-            y[index : index + 2 * self.window - 1, :] = previous_y[1:, :]
-
-            if i == 0:
-                idx = range(lower_bound, upper_bound)
-                for delta in idx:
-                    j = i - self.window + delta + 1
-                    y[
-                        index + delta,
-                        self.vocab.get(self.tokens[j], self.vocab[UNKNOWN_TOKEN]),
-                    ] = 1
-            elif i + self.window < len(self.tokens):
-                j = i + self.window
-                y[
-                    index + 2 * self.window - 1,
-                    self.vocab.get(self.tokens[j], self.vocab[UNKNOWN_TOKEN]),
-                ] = 1
-
-            previous_y = y[index : index + 2 * self.window, :]
-
-            index += 2 * self.window
+            x = self.vocab.get(self.tokens[i], self.vocab[UNKNOWN_TOKEN])
+            y = self.get_target(self.tokens_in_int, i)
+            Y.extend(y)
+            X.extend([x] * len(y))
 
             if (i + 1) % self.batch_size == 0:
-                num_batch += 1
-                yield {"X": X, "y": y}
-                index = 0
-                X = np.zeros((2 * self.window * self.batch_size, len(self.vocab)))
-                y = np.zeros((2 * self.window * self.batch_size, len(self.vocab)))
+                yield {"X": X, "Y": Y}
+                X = []
+                Y = []
 
-        if not self.drop_last and X.any():
-            yield {"X": X, "y": y}
+        if not self.drop_last and X:
+            yield {"X": X, "Y": Y}
 
     def __len__(self) -> int:
         length = len(self.tokens) // self.batch_size
@@ -89,3 +60,11 @@ class DataLoader:
         if not self.drop_last and len(self.tokens) % self.batch_size != 0:
             length = length + 1
         return length
+
+    def get_target(self, tokens_in_int, idx):
+        R = np.random.randint(1, self.window + 1)
+        start = idx - R if (idx - R) > 0 else 0
+        stop = idx + R
+        target_ints = tokens_in_int[start:idx] + tokens_in_int[idx + 1:stop + 1]
+
+        return list(target_ints)
