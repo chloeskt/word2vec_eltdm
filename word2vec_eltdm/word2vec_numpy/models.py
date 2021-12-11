@@ -30,9 +30,9 @@ class SimpleWord2Vec(Network):
                 self.embedding_size,
             ), "weights for initialization are not in the correct shape (len(self.len_vocab), self.embedding_size)"
             assert W2.shape == (
-                self.embedding_size,
                 self.len_vocab,
-            ), "weights for initialization are not in the correct shape (self.embedding_size, len(self.len_vocab))"
+                self.embedding_size,
+            ), "weights for initialization are not in the correct shape (len(self.len_vocab), self.embedding_size)"
             self.W1 = W1
             self.W2 = W2
 
@@ -45,16 +45,17 @@ class SimpleWord2Vec(Network):
             self.W2 = np.random.normal(
                 loc=0.0,
                 scale=1 / np.sqrt(self.embedding_size),
-                size=(self.embedding_size, self.len_vocab),
+                size=(self.len_vocab, self.embedding_size),
             )
 
     def forward(self, X):
         assert self.W1 is not None, "weight matrix W1 is not initialized"
         assert self.W2 is not None, "weight matrix W2 is not initialized"
 
-        h = X @ self.W1
-        u = h @ self.W2
+        h = self.W1[X.flatten(), :].T
+        u = np.dot(self.W2, h)
         y = self.softmax(u)
+
         self.cache["X"] = X
         self.cache["h"] = h
         self.cache["logits"] = u
@@ -63,14 +64,11 @@ class SimpleWord2Vec(Network):
 
     @staticmethod
     def softmax(X):
-        # careful X is a matrix (2*window*batch_size, len(self.len_vocab))
-        preds = []
-        for x in X:
-            exp = np.exp(x - np.max(x))
-            preds.append(exp / exp.sum(axis=0))
-        return np.asarray(preds)
+        return np.divide(
+            np.exp(X - np.max(X)), np.sum(np.exp(X - np.max(X)), axis=0, keepdims=True)
+        )
 
     def backward(self, grad_softmax):
-        dW2 = self.cache["h"].T @ grad_softmax
-        dW1 = self.cache["X"].T @ (grad_softmax @ self.W2.T)
+        dW2 = (1 / self.cache["h"].shape[1]) * np.dot(grad_softmax, self.cache["h"].T)
+        dW1 = np.dot(self.W2.T, grad_softmax)
         return dW1, dW2
