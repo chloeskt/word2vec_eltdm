@@ -23,7 +23,7 @@ class CrossEntropy(Loss):
         self.cache = {}
 
     def forward(self, preds, y):
-        return -np.sum(np.log(preds) * y)
+        return -np.sum(np.log(preds) * y) / len(preds)
 
     def backward(self, preds, y):
         return preds - y
