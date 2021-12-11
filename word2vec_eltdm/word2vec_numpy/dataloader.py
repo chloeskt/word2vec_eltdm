@@ -75,8 +75,6 @@ class DataLoader:
 
             if (i + 1) % self.batch_size == 0:
                 num_batch += 1
-                if num_batch % 100 == 0:
-                    print(f"BATCH {num_batch} done")
                 yield {"X": X, "y": y}
                 index = 0
                 X = np.zeros((2 * self.window * self.batch_size, len(self.vocab)))
