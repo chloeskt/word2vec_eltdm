@@ -1,3 +1,6 @@
+import os
+import pickle
+
 import numpy as np
 import torch as torch
 
@@ -79,6 +82,13 @@ class SimpleWord2Vec(Network):
         dW1 = np.dot(self.W2.T, grad_softmax)
         return dW1, dW2
 
+    def save_model(self, directory: str = "../models") -> None:
+        """Save model as pickle"""
+        model = {self.model_name: self}
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+        pickle.dump(model, open(directory + "/" + self.model_name + ".p", "wb"))
+
 
 class NegWord2Vec:
     """
@@ -97,6 +107,7 @@ class NegWord2Vec:
         self.embedding_size = embedding_size
         self.noise_dist = noise_dist
         self.cache = {}
+        self.model_name = "NegWord2Vec"
         self.best_val_loss = None
         self.best_W1 = None
         self.best_W2 = None
@@ -172,3 +183,10 @@ class NegWord2Vec:
     def eval(self):
         """sets the network in evaluation mode, i.e. only computes forward pass"""
         self.return_grad = False
+
+    def save_model(self, directory: str = "../models") -> None:
+        """Save model as pickle"""
+        model = {self.model_name: self}
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+        pickle.dump(model, open(directory + "/" + self.model_name + ".p", "wb"))
