@@ -1,5 +1,3 @@
-import math
-
 import numpy as np
 
 
@@ -70,7 +68,7 @@ class OptimizeNSL(Optimizer):
         decay_rate: float = None,
         method: str = "time_based",
     ):
-        super().__init__()
+        super().__init__(model, learning_rate, decay_rate, method)
         self.model = model
         self.learning_rate = learning_rate
         self.decay_rate = decay_rate
