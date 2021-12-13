@@ -7,4 +7,4 @@ from .subsampler import Subsampler
 from .models import SimpleWord2Vec, NegWord2Vec
 from .optimizers import Optimizer, OptimizeNSL
 from .losses import CrossEntropy, NegativeSamplingLoss
-from .utils import train, validate
+from .utils import train, validate, evaluate, visualization_tsne
