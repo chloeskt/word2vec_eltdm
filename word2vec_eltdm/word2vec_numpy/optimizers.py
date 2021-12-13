@@ -39,6 +39,9 @@ class Optimizer:
             if epoch % epoch_drop == 0 and epoch != 0:
                 self.learning_rate *= drop
 
+        elif self.method == "none":
+            pass
+
         else:
             raise NotImplementedError
 
