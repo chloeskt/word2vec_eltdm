@@ -12,7 +12,7 @@ class Preprocessor:
         token_cleaner: TokenCleaner,
         vocab_creator: VocabCreator,
         ratio: float,
-        return_only_train: bool = False
+        return_only_train: bool = True
     ) -> None:
         self.tokenizer = tokenizer
         self.token_cleaner = token_cleaner

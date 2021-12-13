@@ -14,7 +14,7 @@ class DataLoader:
         window: int,
         batch_size: int = 1,
         shuffle: bool = False,
-        drop_last: bool = True,
+        drop_last: bool = False,
     ) -> None:
         """
         :param dataset: dataset
