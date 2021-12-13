@@ -3,7 +3,7 @@ from copy import deepcopy
 from tqdm.notebook import tqdm
 
 
-def train(model, train_dataloader, val_dataloader, criterion, optimizer):
+def train(model, train_dataloader, criterion, optimizer):
     train_loss = 0.0
     for i, batch in enumerate(tqdm(train_dataloader)):
         model.train()
@@ -18,10 +18,9 @@ def train(model, train_dataloader, val_dataloader, criterion, optimizer):
             print(
                 "Current Training Loss {:.6}".format(loss)
             )
-            validation_loss = validate(model, val_dataloader, criterion)
 
     train_loss /= len(train_dataloader)
-    return train_loss, validation_loss
+    return train_loss
 
 
 def update_best_loss(model, val_loss):
@@ -41,11 +40,6 @@ def validate(model, dataloader, criterion):
         preds, _ = model(X)
         loss, _ = criterion(preds, y)
         validation_loss += loss
-
-        # if i % 1500 == 0:
-        #     print(
-        #         "Current Validation Loss {:.6}".format(loss)
-        #     )
 
     validation_loss /= len(dataloader)
 
