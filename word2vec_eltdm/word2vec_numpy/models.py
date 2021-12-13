@@ -87,7 +87,9 @@ class SimpleWord2Vec(Network):
         model = {self.model_name: self}
         if not os.path.exists(directory):
             os.makedirs(directory)
-        pickle.dump(model, open(directory + "/" + self.model_name + ".p", "wb"))
+            print('Saving model')
+        with open(directory + "/" + self.model_name + "_" + str(self.best_val_loss) + ".p", "wb") as file:
+            pickle.dump(model, file)
 
 
 class NegWord2Vec:
@@ -101,6 +103,7 @@ class NegWord2Vec:
         hidden_size: int = 500,
         embedding_size: int = 300,
         noise_dist: np.array = None,
+        best_val_loss = None
     ):
         self.len_vocab = len_vocab
         self.hidden_size = hidden_size
@@ -108,7 +111,7 @@ class NegWord2Vec:
         self.noise_dist = noise_dist
         self.cache = {}
         self.model_name = "NegWord2Vec"
-        self.best_val_loss = None
+        self.best_val_loss = best_val_loss
         self.best_W1 = None
         self.best_W2 = None
 
@@ -184,9 +187,11 @@ class NegWord2Vec:
         """sets the network in evaluation mode, i.e. only computes forward pass"""
         self.return_grad = False
 
-    def save_model(self, directory: str = "../models") -> None:
+    def save_model(self, directory: str = "../word2vec_eltdm/models") -> None:
         """Save model as pickle"""
         model = {self.model_name: self}
         if not os.path.exists(directory):
             os.makedirs(directory)
-        pickle.dump(model, open(directory + "/" + self.model_name + ".p", "wb"))
+        print('Saving model')
+        with open(directory + "/" + self.model_name + "_" + str(self.best_val_loss) + ".p", "wb") as file:
+            pickle.dump(model, file)

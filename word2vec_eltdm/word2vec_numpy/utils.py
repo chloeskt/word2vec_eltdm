@@ -1,3 +1,5 @@
+from copy import deepcopy
+
 from tqdm.notebook import tqdm
 
 
@@ -26,8 +28,9 @@ def update_best_loss(model, val_loss):
     # Update the model and best loss if we see improvements.
     if not model.best_val_loss or val_loss < model.best_val_loss:
         model.best_val_loss = val_loss
-        model.best_W1 = model.W1
-        model.best_W2 = model.W2
+        model.best_W1 = deepcopy(model.W1)
+        model.best_W2 = deepcopy(model.W2)
+        model.save_model()
 
 
 def validate(model, dataloader, criterion):
