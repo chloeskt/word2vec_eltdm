@@ -82,13 +82,13 @@ class SimpleWord2Vec(Network):
         dW1 = np.dot(self.W2.T, grad_softmax)
         return dW1, dW2
 
-    def save_model(self, directory: str = "../models") -> None:
+    def save_model(self, directory: str = "../word2vec_eltdm/models") -> None:
         """Save model as pickle"""
         model = {self.model_name: self}
         if not os.path.exists(directory):
             os.makedirs(directory)
-            print('Saving model')
         with open(directory + "/" + self.model_name + "_" + str(self.best_val_loss) + ".p", "wb") as file:
+            print('Saving model')
             pickle.dump(model, file)
 
 
@@ -192,6 +192,6 @@ class NegWord2Vec:
         model = {self.model_name: self}
         if not os.path.exists(directory):
             os.makedirs(directory)
-        print('Saving model')
         with open(directory + "/" + self.model_name + "_" + str(self.best_val_loss) + ".p", "wb") as file:
+            print('Saving model')
             pickle.dump(model, file)
