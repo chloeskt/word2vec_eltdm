@@ -1,10 +1,11 @@
-from copy import deepcopy
 import random
+from copy import deepcopy
 from typing import Dict
 
 import matplotlib.pyplot as plt
 import numpy as np
 from sklearn.manifold import TSNE
+from sklearn.metrics.pairwise import cosine_similarity
 from tqdm.notebook import tqdm
 
 
@@ -54,27 +55,18 @@ def validate(model, dataloader, criterion):
     return validation_loss
 
 
-def cosine_similarity(embeddings: np.array, len_vocab: int, nb_words: int = 20):
-    """
-    Returns the cosine similarity of randomly chosen `nb_words` words in the embedding matrix.
-    params:
-        embeddings: np.array
-            weights W1 corresponding to the embedding layer of our model
-    """
-    magnitudes = np.sqrt((embeddings ** 2).sum(axis=1))
-    examples = np.array(random.sample(range(len_vocab), nb_words))
-    examples_vectors = embeddings[examples]
-    similarities = (examples_vectors @ embeddings.T) / magnitudes
-    return examples, similarities
-
-
 def evaluate(embeddings: np.array, id_to_tokens: Dict[int, str], nb_words: int) -> None:
     """
     For `nb_words` words randomly chosen in the dataset, get the top 5 words according to their
     cosine similarity (preview of word similarity) to evaluate qualitatively the model.
     """
     len_vocab = len(id_to_tokens)
-    examples, similarities = cosine_similarity(embeddings, len_vocab, nb_words)
+
+    examples = np.array(random.sample(range(len_vocab), nb_words))
+    examples_vectors = embeddings[examples]
+
+    similarities = cosine_similarity(embeddings, examples_vectors)
+
     closest_idxs = np.flip(np.argsort(similarities, axis=1)[:, -6:], axis=1)
 
     for i, exemple_idx in enumerate(examples):
