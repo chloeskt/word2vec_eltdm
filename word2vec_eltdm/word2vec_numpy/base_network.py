@@ -38,7 +38,3 @@ class Network(ABC):
     def eval(self):
         """sets the network in evaluation mode, i.e. only computes forward pass"""
         self.return_grad = False
-
-    # @abstractmethod
-    # def save_model(self, data=None):
-    #     """each model should know what are the relevant things it needs for saving itself."""

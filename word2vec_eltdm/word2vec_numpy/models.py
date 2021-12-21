@@ -17,12 +17,10 @@ class SimpleWord2Vec(Network):
     def __init__(
         self,
         len_vocab: int,
-        hidden_size: int = 500,
         embedding_size: int = 300,
     ):
         super(SimpleWord2Vec, self).__init__("SimpleWord2Vec")
         self.len_vocab = len_vocab
-        self.hidden_size = hidden_size
         self.embedding_size = embedding_size
         self.cache = {}
         self.best_val_loss = None
@@ -87,8 +85,11 @@ class SimpleWord2Vec(Network):
         model = {self.model_name: self}
         if not os.path.exists(directory):
             os.makedirs(directory)
-        with open(directory + "/" + self.model_name + "_" + str(self.best_val_loss) + ".p", "wb") as file:
-            print('Saving model')
+        with open(
+            directory + "/" + self.model_name + "_" + str(self.best_val_loss) + ".p",
+            "wb",
+        ) as file:
+            print("Saving model")
             pickle.dump(model, file)
 
 
@@ -100,13 +101,11 @@ class NegWord2Vec:
     def __init__(
         self,
         len_vocab: int,
-        hidden_size: int = 500,
         embedding_size: int = 300,
         noise_dist: np.array = None,
-        best_val_loss = None
+        best_val_loss=None,
     ):
         self.len_vocab = len_vocab
-        self.hidden_size = hidden_size
         self.embedding_size = embedding_size
         self.noise_dist = noise_dist
         self.cache = {}
@@ -129,14 +128,24 @@ class NegWord2Vec:
             self.W2 = W2
 
         else:
-            self.W1 = np.random.uniform(
-                low=-1,
-                high=1,
+            # self.W1 = np.random.uniform(
+            #     low=-1,
+            #     high=1,
+            #     size=(self.len_vocab, self.embedding_size),
+            # )
+            # self.W2 = np.random.uniform(
+            #     low=-1,
+            #     high=1,
+            #     size=(self.len_vocab, self.embedding_size),
+            # )
+            self.W1 = np.random.normal(
+                loc=0.0,
+                scale=1 / np.sqrt(self.embedding_size),
                 size=(self.len_vocab, self.embedding_size),
             )
-            self.W2 = np.random.uniform(
-                low=-1,
-                high=1,
+            self.W2 = np.random.normal(
+                loc=0.0,
+                scale=1 / np.sqrt(self.embedding_size),
                 size=(self.len_vocab, self.embedding_size),
             )
 
@@ -192,6 +201,9 @@ class NegWord2Vec:
         model = {self.model_name: self}
         if not os.path.exists(directory):
             os.makedirs(directory)
-        with open(directory + "/" + self.model_name + "_" + str(self.best_val_loss) + ".p", "wb") as file:
-            print('Saving model')
+        with open(
+            directory + "/" + self.model_name + "_" + str(self.best_val_loss) + ".p",
+            "wb",
+        ) as file:
+            print("Saving model")
             pickle.dump(model, file)

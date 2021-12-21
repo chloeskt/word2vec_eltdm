@@ -1,8 +1,7 @@
 import numpy as np
-from torch import nn
 
 
-class Loss(object):
+class Loss:
     def __init__(self):
         self.grad_history = []
 
@@ -36,16 +35,16 @@ class CrossEntropy(Loss):
         return grad
 
 
-class NegativeSamplingLoss(nn.Module):
+class NegativeSamplingLoss(Loss):
     def __init__(self):
         super().__init__()
 
     def __call__(self, model, input_vectors, output_vectors, noise_vectors, y):
         loss = self.forward(input_vectors, output_vectors, noise_vectors)
-        grad1, grad2 = self.backward(
+        grad1, grad2_pos, grad2_neg = self.backward(
             model, input_vectors, output_vectors, noise_vectors, y
         )
-        return loss, grad1, grad2
+        return loss, grad1, grad2_pos, grad2_neg
 
     def forward(self, input_vectors, output_vectors, noise_vectors):
         batch_size, embed_size = input_vectors.shape
@@ -65,7 +64,6 @@ class NegativeSamplingLoss(nn.Module):
         noise_loss = noise_loss.squeeze().sum(
             1
         )  # sum the losses over the sample of noise vectors
-
         # negate and sum correct and noisy log-sigmoid losses
         # return average batch loss
         return -(out_loss + noise_loss).mean()
@@ -83,27 +81,31 @@ class NegativeSamplingLoss(nn.Module):
         # Output vectors should be a batch of row vectors
         output_vectors = output_vectors.reshape(batch_size, 1, embed_size)
 
-        cj_h = self.sigmoid(output_vectors @ input_vectors).squeeze(axis=2)
-
-        cn_h = self.sigmoid(noise_vectors @ input_vectors).squeeze()
-
-        outs = np.concatenate([cj_h, cn_h], axis=1)
-
-        # compute prediction error
-        outs[:, -1] -= 1
-        outs = np.expand_dims(outs, axis=1)
-
-        # gradient wrt to W1
-        W1_y = model.W1[y, :].reshape(batch_size, 1, embed_size)
-        W1_noise = model.W1[model.cache["noise_words"], :].reshape(
-            batch_size, model.cache["n_samples"], embed_size
+        sigmoid_context = (
+            self.sigmoid(output_vectors @ input_vectors).squeeze(axis=2) - 1
+        ).squeeze()
+        product_context = np.multiply(
+            output_vectors.squeeze(), sigmoid_context[:, None]
         )
-        W1_batch = np.concatenate([W1_y, W1_noise], axis=1)
-        grad_W1 = (outs @ W1_batch).squeeze()
 
-        # gradient wrt to W2
-        outs = np.moveaxis(outs, [0, 1, 2], [0, 2, 1])
-        input_vectors = np.moveaxis(input_vectors, [0, 1, 2], [0, 2, 1])
-        grad_W2 = outs @ input_vectors
+        sigmoid_noise = self.sigmoid(-noise_vectors @ input_vectors)
+        sigmoid_noise -= np.ones(sigmoid_noise.shape)
 
-        return grad_W1, grad_W2
+        context_noise = np.multiply(noise_vectors, sigmoid_noise)
+        context_noise = context_noise.sum(axis=1)
+
+        # gradient wrt W1
+        grad_W1 = product_context - context_noise
+
+        # gradient wrt context words
+        grad_W2_positive = np.multiply(
+            input_vectors.squeeze(), sigmoid_context[:, None]
+        )
+
+        # gradient wrt negative words (one gradient for each negative word and for each
+        # context word)
+        grad_W2_negative = np.negative(
+            np.multiply(input_vectors.reshape(batch_size, 1, embed_size), sigmoid_noise)
+        )
+
+        return grad_W1, grad_W2_positive, grad_W2_negative

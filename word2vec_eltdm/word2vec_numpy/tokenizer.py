@@ -29,5 +29,5 @@ class Tokenizer:
         # .replace(':', ' <COLON> ')
 
         tokens = pattern.findall(data)
-        id_to_keep = int(ratio*len(tokens))
+        id_to_keep = int(ratio * len(tokens))
         return tokens[:id_to_keep]
