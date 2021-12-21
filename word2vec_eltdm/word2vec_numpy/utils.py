@@ -5,7 +5,6 @@ from typing import Dict
 import matplotlib.pyplot as plt
 import numpy as np
 from sklearn.manifold import TSNE
-from sklearn.metrics.pairwise import cosine_similarity
 from tqdm.notebook import tqdm
 
 
@@ -72,6 +71,14 @@ def evaluate(embeddings: np.array, id_to_tokens: Dict[int, str], nb_words: int) 
     for i, exemple_idx in enumerate(examples):
         closest_words = [id_to_tokens[idx] for idx in closest_idxs[i]][1:]
         print(id_to_tokens[exemple_idx] + " | " + ", ".join(closest_words))
+
+
+def cosine_similarity(embeddings: np.array, example_vectors=np.array):
+    nominator = example_vectors @ embeddings.T
+    denominator = np.sqrt(np.sum(embeddings ** 2, axis=1))
+    denominator = np.expand_dims(denominator, axis=1).reshape(1, -1)
+    cosine_similarity = nominator / denominator
+    return cosine_similarity
 
 
 def visualization_tsne(

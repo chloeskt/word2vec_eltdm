@@ -64,6 +64,7 @@ class NegativeSamplingLoss(Loss):
         noise_loss = noise_loss.squeeze().sum(
             1
         )  # sum the losses over the sample of noise vectors
+
         # negate and sum correct and noisy log-sigmoid losses
         # return average batch loss
         return -(out_loss + noise_loss).mean()
