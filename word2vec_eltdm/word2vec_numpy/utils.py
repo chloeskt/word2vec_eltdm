@@ -7,8 +7,24 @@ import numpy as np
 from sklearn.manifold import TSNE
 from tqdm.notebook import tqdm
 
+from word2vec_eltdm.word2vec_numpy import (
+    SimpleWord2Vec,
+    CrossEntropy,
+    DataLoader,
+    Optimizer,
+    NegWord2Vec,
+    NegativeSamplingLoss,
+    OptimizeNSL,
+)
+from word2vec_eltdm.word2vec_numpy.base_network import Network
 
-def train(model, train_dataloader, criterion, optimizer):
+
+def train_default(
+    model: SimpleWord2Vec,
+    train_dataloader: DataLoader,
+    criterion: CrossEntropy,
+    optimizer: Optimizer,
+) -> float:
     train_loss = 0.0
     for i, batch in enumerate(tqdm(train_dataloader)):
         model.train()
@@ -26,16 +42,9 @@ def train(model, train_dataloader, criterion, optimizer):
     return train_loss
 
 
-def update_best_loss(model, val_loss):
-    # Update the model and best loss if we see improvements.
-    if not model.best_val_loss or val_loss < model.best_val_loss:
-        model.best_val_loss = val_loss
-        model.best_W1 = deepcopy(model.W1)
-        model.best_W2 = deepcopy(model.W2)
-        model.save_model()
-
-
-def validate(model, dataloader, criterion):
+def validate_default(
+    model: SimpleWord2Vec, dataloader: DataLoader, criterion: CrossEntropy
+) -> float:
     model.eval()
     validation_loss = 0
     for i, batch in enumerate(tqdm(dataloader)):
@@ -48,10 +57,77 @@ def validate(model, dataloader, criterion):
 
     # Keep track of the best model
     update_best_loss(model, validation_loss)
-
     print("Validation Loss: ", validation_loss)
-
     return validation_loss
+
+
+def train_NSL(
+    model: NegWord2Vec,
+    train_dataloader: DataLoader,
+    criterion: NegativeSamplingLoss,
+    optimizer: OptimizeNSL,
+    n_samples: int,
+) -> float:
+    train_loss = 0.0
+    for i, batch in enumerate(tqdm(train_dataloader)):
+        model.train()
+        X, y = batch["X"], batch["Y"]
+        h = model.forward_input(X)
+        u = model.forward_output(y)
+        noise_vector = model.forward_noise(X.shape[1], n_samples)
+
+        # negative sampling loss
+        loss, grad_W1, grad_W2_pos, grad_W2_neg = criterion(
+            model, h, u, noise_vector, y
+        )
+        optimizer.step(grad_W1, grad_W2_pos, grad_W2_neg)
+
+        train_loss += loss
+
+    train_loss /= len(train_dataloader)
+    return train_loss
+
+
+def update_best_loss(model: Network, val_loss: float) -> None:
+    # Update the model and best loss if we see improvements.
+    if not model.best_val_loss or val_loss < model.best_val_loss:
+        model.best_val_loss = val_loss
+        model.best_W1 = deepcopy(model.W1)
+        model.best_W2 = deepcopy(model.W2)
+        print(f"Now best model has {val_loss} loss")
+        model.save_model()
+
+
+def validate_NSL(
+    model: NegWord2Vec,
+    dataloader: DataLoader,
+    criterion: NegativeSamplingLoss,
+    n_samples: int,
+) -> float:
+    model.eval()
+    validation_loss = 0
+    for i, batch in enumerate(tqdm(dataloader)):
+        X, y = batch["X"], batch["Y"]
+        h = model.forward_input(X)
+        u = model.forward_output(y)
+        noise_vector = model.forward_noise(X.shape[1], n_samples)
+
+        loss, _, _, _ = criterion(model, h, u, noise_vector, y)
+        validation_loss += loss
+
+    validation_loss /= len(dataloader)
+    # Keep track of the best model
+    update_best_loss(model, validation_loss)
+    print("Validation Loss: ", validation_loss)
+    return validation_loss
+
+
+def cosine_similarity(embeddings: np.array, example_vectors: np.array) -> np.array:
+    nominator = example_vectors @ embeddings.T
+    denominator = np.sqrt(np.sum(embeddings ** 2, axis=1))
+    denominator = np.expand_dims(denominator, axis=1).reshape(1, -1)
+    cosine_similarity = nominator / denominator
+    return cosine_similarity
 
 
 def evaluate(embeddings: np.array, id_to_tokens: Dict[int, str], nb_words: int) -> None:
@@ -71,14 +147,6 @@ def evaluate(embeddings: np.array, id_to_tokens: Dict[int, str], nb_words: int) 
     for i, exemple_idx in enumerate(examples):
         closest_words = [id_to_tokens[idx] for idx in closest_idxs[i]][1:]
         print(id_to_tokens[exemple_idx] + " | " + ", ".join(closest_words))
-
-
-def cosine_similarity(embeddings: np.array, example_vectors=np.array):
-    nominator = example_vectors @ embeddings.T
-    denominator = np.sqrt(np.sum(embeddings ** 2, axis=1))
-    denominator = np.expand_dims(denominator, axis=1).reshape(1, -1)
-    cosine_similarity = nominator / denominator
-    return cosine_similarity
 
 
 def visualization_tsne(
