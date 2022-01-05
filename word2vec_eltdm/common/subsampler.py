@@ -4,7 +4,7 @@ from typing import List, Tuple, Dict
 
 import numpy as np
 
-from word2vec_eltdm.word2vec_numpy.vocabcreator import UNKNOWN_TOKEN
+from word2vec_eltdm.common.vocabcreator import UNKNOWN_TOKEN
 
 random.seed(0)
 

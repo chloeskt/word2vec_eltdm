@@ -7,10 +7,10 @@ import numpy as np
 from sklearn.manifold import TSNE
 from tqdm.notebook import tqdm
 
+from word2vec_eltdm.common import DataLoader
 from word2vec_eltdm.word2vec_numpy import (
     SimpleWord2Vec,
     CrossEntropy,
-    DataLoader,
     Optimizer,
     NegWord2Vec,
     NegativeSamplingLoss,
@@ -130,14 +130,21 @@ def cosine_similarity(embeddings: np.array, example_vectors: np.array) -> np.arr
     return cosine_similarity
 
 
-def evaluate(embeddings: np.array, id_to_tokens: Dict[int, str], nb_words: int) -> None:
+def evaluate(
+    embeddings: np.array,
+    id_to_tokens: Dict[int, str],
+    nb_words: int = 16,
+    valid_window: int = 100,
+) -> None:
     """
     For `nb_words` words randomly chosen in the dataset, get the top 5 words according to their
     cosine similarity (preview of word similarity) to evaluate qualitatively the model.
     """
-    len_vocab = len(id_to_tokens)
+    examples = np.array(random.sample(range(valid_window), nb_words // 2))
+    examples = np.append(
+        examples, random.sample(range(1000, 1000 + valid_window), nb_words // 2)
+    )
 
-    examples = np.array(random.sample(range(len_vocab), nb_words))
     examples_vectors = embeddings[examples]
 
     similarities = cosine_similarity(embeddings, examples_vectors)

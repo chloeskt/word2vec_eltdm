@@ -2,8 +2,8 @@ from typing import List, Generator
 
 import numpy as np
 
-from word2vec_eltdm.word2vec_numpy.dataset import Dataset
-from word2vec_eltdm.word2vec_numpy.vocabcreator import UNKNOWN_TOKEN
+from word2vec_eltdm.common.dataset import Dataset
+from word2vec_eltdm.common.vocabcreator import UNKNOWN_TOKEN
 
 
 class DataLoader:
