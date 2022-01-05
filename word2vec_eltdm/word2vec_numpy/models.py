@@ -4,7 +4,7 @@ import pickle
 import numpy as np
 import torch as torch
 
-from word2vec_eltdm.word2vec_numpy.base_network import Network
+from word2vec_eltdm.common.base_network import Network
 
 rng = np.random.default_rng(0)
 

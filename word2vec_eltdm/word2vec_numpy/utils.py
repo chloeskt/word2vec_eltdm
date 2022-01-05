@@ -16,7 +16,7 @@ from word2vec_eltdm.word2vec_numpy import (
     NegativeSamplingLoss,
     OptimizeNSL,
 )
-from word2vec_eltdm.word2vec_numpy.base_network import Network
+from word2vec_eltdm.common.base_network import Network
 
 
 def train_default(
