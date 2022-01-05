@@ -16,6 +16,8 @@ NVIDIA GeForce RTX 3080 (10GB VRAM).
 
 ## Installation 
 
+The code was run and tested in Python 3.8.
+
 ````python
 pip install -r requirements.txt
 ````
