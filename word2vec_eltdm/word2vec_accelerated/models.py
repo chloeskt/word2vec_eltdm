@@ -58,6 +58,7 @@ class PytorchNegWord2Vec(nn.Module):
         vocab_size: int,
         embedding_dim: int,
         noise_dist: torch.Tensor,
+        device: str = "cpu"
     ) -> None:
         super().__init__()
         self.model_name = "PytorchNegWord2Vec"
@@ -67,6 +68,7 @@ class PytorchNegWord2Vec(nn.Module):
         self.embedding_input = nn.Embedding(self.vocab_size, self.embedding_dim)
         self.embedding_output = nn.Embedding(self.vocab_size, self.embedding_dim)
         self.best_val_loss = None
+        self.device = device
 
     def initialize_weights(self) -> None:
         self.embedding_input.weight.data.uniform_(-1, 1)
@@ -91,6 +93,7 @@ class PytorchNegWord2Vec(nn.Module):
             noise_dist, batch_size * n_samples, replacement=True
         )
 
+        noise_words = noise_words.to(self.device)
         noise_vector = self.embedding_output(noise_words).view(
             batch_size, n_samples, self.embedding_dim
         )
