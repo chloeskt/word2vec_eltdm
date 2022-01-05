@@ -74,9 +74,11 @@ def train_NSL(
     return train_loss
 
 
-def update_best_loss(model: nn.Module, val_loss: float) -> None:
+def update_best_loss(model: nn.Module, val_loss: float, device: str = "cpu") -> None:
     # Update the model and best loss if we see improvements.
     if not model.best_val_loss or val_loss < model.best_val_loss:
         model.best_val_loss = val_loss
         print(f"Now best model has {val_loss} loss")
+        model.to("cpu")
         model.save_model()
+        model.to(device)
