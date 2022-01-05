@@ -6,3 +6,4 @@ from .token_cleaner import TokenCleaner
 from .tokenizer import Tokenizer
 from .vocabcreator import VocabCreator
 from .base_network import Network
+from .utils import evaluate, visualization_tsne

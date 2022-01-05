@@ -27,7 +27,7 @@ class SimpleWord2Vec(Network):
         self.best_W1 = None
         self.best_W2 = None
 
-    def initialize_weights(self, W1: np.array = None, W2: np.array = None):
+    def initialize_weights(self, W1: np.array = None, W2: np.array = None) -> None:
         if W1 and W2:
             assert W1.shape == (
                 self.len_vocab,
@@ -95,7 +95,7 @@ class SimpleWord2Vec(Network):
 
 class NegWord2Vec:
     """
-    Very basic implementation of Word2Vec without any "speed" tricks.
+    Word2Vec architecture using Negative Sampling Loss.
     """
 
     def __init__(
@@ -160,7 +160,6 @@ class NegWord2Vec:
         return u
 
     def forward_noise(self, batch_size, n_samples):
-        """Generate noise vectors with shape (batch_size, n_samples, n_embed)"""
         if self.noise_dist is None:
             # Sample words uniformly
             self.noise_dist = np.ones(self.len_vocab) / self.len_vocab
