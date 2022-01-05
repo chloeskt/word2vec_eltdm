@@ -1,8 +1,9 @@
 from typing import List
 
-from word2vec_eltdm.word2vec_numpy import Tokenizer, VocabCreator
-from word2vec_eltdm.common.dataset import Dataset
-from word2vec_eltdm.common.token_cleaner import TokenCleaner
+from .vocabcreator import VocabCreator
+from .tokenizer import Tokenizer
+from .dataset import Dataset
+from .token_cleaner import TokenCleaner
 
 
 class Preprocessor:
