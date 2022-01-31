@@ -55,7 +55,7 @@ if __name__=="__main__":
 
     # using the loss that we defined
     criterion = nn.CrossEntropyLoss()
-    optimizer = optim.Adam(model.parameters(), lr=learning_rate)
+    optimizer = optim.SGD(model.parameters(), lr=learning_rate)
 
     # train for some number of epochs
     epochs = 1

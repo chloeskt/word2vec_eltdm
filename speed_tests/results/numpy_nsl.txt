@@ -1,0 +1,244 @@
+Timer unit: 1e-06 s
+
+Total time: 16.4631 s
+File: /home/kaliayev/Documents/ENSAE/elements_logiciels/word2vec_eltdm/word2vec_eltdm/word2vec_numpy/losses.py
+Function: __call__ at line 44
+
+Line #      Hits         Time  Per Hit   % Time  Line Contents
+==============================================================
+    44                                               @profile
+    45                                               def __call__(self, model, input_vectors, output_vectors, noise_vectors, y):
+    46      1131    3756215.0   3321.1     22.8          loss = self.forward(input_vectors, output_vectors, noise_vectors)
+    47      2262   12706131.0   5617.2     77.2          grad1, grad2_pos, grad2_neg = self.backward(
+    48      1131        286.0      0.3      0.0              model, input_vectors, output_vectors, noise_vectors, y
+    49                                                   )
+    50      1131        437.0      0.4      0.0          return loss, grad1, grad2_pos, grad2_neg
+
+Total time: 3.74759 s
+File: /home/kaliayev/Documents/ENSAE/elements_logiciels/word2vec_eltdm/word2vec_eltdm/word2vec_numpy/losses.py
+Function: forward at line 52
+
+Line #      Hits         Time  Per Hit   % Time  Line Contents
+==============================================================
+    52                                               @profile
+    53                                               def forward(self, input_vectors, output_vectors, noise_vectors):
+    54      1131        736.0      0.7      0.0          batch_size, embed_size = input_vectors.shape
+    55
+    56                                                   # Input vectors should be a batch of column vectors
+    57      1131        859.0      0.8      0.0          input_vectors = input_vectors.reshape(batch_size, embed_size, 1)
+    58
+    59                                                   # Output vectors should be a batch of row vectors
+    60      1131        595.0      0.5      0.0          output_vectors = output_vectors.reshape(batch_size, 1, embed_size)
+    61
+    62                                                   # correct log-sigmoid loss
+    63      1131     437910.0    387.2     11.7          out_loss = np.log(self.sigmoid(output_vectors @ input_vectors))
+    64      1131       1240.0      1.1      0.0          out_loss = out_loss.squeeze()
+    65
+    66                                                   # incorrect log-sigmoid loss
+    67      1131    3239823.0   2864.6     86.5          noise_loss = np.log(self.sigmoid(-noise_vectors @ input_vectors))
+    68      2262      34981.0     15.5      0.9          noise_loss = noise_loss.squeeze().sum(
+    69      1131        344.0      0.3      0.0              1
+    70                                                   )  # sum the losses over the sample of noise vectors
+    71
+    72                                                   # negate and sum correct and noisy log-sigmoid losses
+    73                                                   # return average batch loss
+    74      1131      31106.0     27.5      0.8          return -(out_loss + noise_loss).mean()
+
+Total time: 12.6869 s
+File: /home/kaliayev/Documents/ENSAE/elements_logiciels/word2vec_eltdm/word2vec_eltdm/word2vec_numpy/losses.py
+Function: backward at line 81
+
+Line #      Hits         Time  Per Hit   % Time  Line Contents
+==============================================================
+    81                                               @profile
+    82                                               def backward(self, model, input_vectors, output_vectors, noise_vectors, y):
+    83      1131       1261.0      1.1      0.0          batch_size, embed_size = input_vectors.shape
+    84
+    85                                                   # Input vectors should be a batch of column vectors
+    86      1131       1522.0      1.3      0.0          input_vectors = input_vectors.reshape(batch_size, embed_size, 1)
+    87                                                   # Output vectors should be a batch of row vectors
+    88      1131        673.0      0.6      0.0          output_vectors = output_vectors.reshape(batch_size, 1, embed_size)
+    89
+    90      1131        994.0      0.9      0.0          sigmoid_context = (
+    91      1131     401242.0    354.8      3.2              self.sigmoid(output_vectors @ input_vectors).squeeze(axis=2) - 1
+    92                                                   ).squeeze()
+    93      2262     385136.0    170.3      3.0          product_context = np.multiply(
+    94      1131       1935.0      1.7      0.0              output_vectors.squeeze(), sigmoid_context[:, None]
+    95                                                   )
+    96
+    97      1131    3098606.0   2739.7     24.4          sigmoid_noise = self.sigmoid(-noise_vectors @ input_vectors)
+    98      1131      21528.0     19.0      0.2          sigmoid_noise -= np.ones(sigmoid_noise.shape)
+    99
+   100      1131    2195490.0   1941.2     17.3          context_noise = np.multiply(noise_vectors, sigmoid_noise)
+   101      1131    1556621.0   1376.3     12.3          context_noise = context_noise.sum(axis=1)
+   102
+   103                                                   # gradient wrt W1
+   104      1131     385115.0    340.5      3.0          grad_W1 = product_context - context_noise
+   105
+   106                                                   # gradient wrt context words
+   107      2262     415710.0    183.8      3.3          grad_W2_positive = np.multiply(
+   108      1131       2381.0      2.1      0.0              input_vectors.squeeze(), sigmoid_context[:, None]
+   109                                                   )
+   110
+   111                                                   # gradient wrt negative words (one gradient for each negative word and for each
+   112                                                   # context word)
+   113      2262    2082483.0    920.6     16.4          grad_W2_negative = np.negative(
+   114      1131    2135251.0   1887.9     16.8              np.multiply(input_vectors.reshape(batch_size, 1, embed_size), sigmoid_noise)
+   115                                                   )
+   116
+   117      1131        996.0      0.9      0.0          return grad_W1, grad_W2_positive, grad_W2_negative
+
+Total time: 0.270661 s
+File: /home/kaliayev/Documents/ENSAE/elements_logiciels/word2vec_eltdm/word2vec_eltdm/word2vec_numpy/models.py
+Function: forward_input at line 144
+
+Line #      Hits         Time  Per Hit   % Time  Line Contents
+==============================================================
+   144                                               @profile
+   145                                               def forward_input(self, X):
+   146      1131     268676.0    237.6     99.3          h = self.W1[X.squeeze(), :]
+   147      1131       1694.0      1.5      0.6          self.cache["X"] = X
+   148      1131        291.0      0.3      0.1          return h
+
+Total time: 0.270422 s
+File: /home/kaliayev/Documents/ENSAE/elements_logiciels/word2vec_eltdm/word2vec_eltdm/word2vec_numpy/models.py
+Function: forward_output at line 150
+
+Line #      Hits         Time  Per Hit   % Time  Line Contents
+==============================================================
+   150                                               @profile
+   151                                               def forward_output(self, y):
+   152      1131     269278.0    238.1     99.6          u = self.W2[y.squeeze(), :]
+   153      1131        923.0      0.8      0.3          self.cache["y"] = y
+   154      1131        221.0      0.2      0.1          return u
+
+Total time: 2.59643 s
+File: /home/kaliayev/Documents/ENSAE/elements_logiciels/word2vec_eltdm/word2vec_eltdm/word2vec_numpy/models.py
+Function: forward_noise at line 156
+
+Line #      Hits         Time  Per Hit   % Time  Line Contents
+==============================================================
+   156                                               @profile
+   157                                               def forward_noise(self, batch_size, n_samples):
+   158      1131        594.0      0.5      0.0          if self.noise_dist is None:
+   159                                                       # Sample words uniformly
+   160                                                       self.noise_dist = np.ones(self.len_vocab) / self.len_vocab
+   161
+   162                                                   # Sample words from our noise distribution
+   163                                                   # Use torch multinomial because it has the behavior we want compared to np multinomial
+   164      2262     618121.0    273.3     23.8          noise_words = torch.multinomial(
+   165      1131      15164.0     13.4      0.6              torch.from_numpy(self.noise_dist), batch_size * n_samples, replacement=True
+   166                                                   ).numpy()
+   167
+   168                                                   # Get the noise embeddings
+   169      2262    1958444.0    865.8     75.4          noise_vector = self.W2[noise_words, :].reshape(
+   170      1131        943.0      0.8      0.0              batch_size, n_samples, self.embedding_size
+   171                                                   )
+   172      1131       2450.0      2.2      0.1          self.cache["noise_words"] = noise_words
+   173      1131        405.0      0.4      0.0          self.cache["n_samples"] = n_samples
+   174
+   175      1131        313.0      0.3      0.0          return noise_vector
+
+Total time: 2e-06 s
+File: /home/kaliayev/Documents/ENSAE/elements_logiciels/word2vec_eltdm/word2vec_eltdm/word2vec_numpy/optimizers.py
+Function: update_lr at line 29
+
+Line #      Hits         Time  Per Hit   % Time  Line Contents
+==============================================================
+    29                                               @profile
+    30                                               def update_lr(self, epoch: int):
+    31         1          1.0      1.0     50.0          if self.method == "time_based":
+    32                                                       self.learning_rate *= 1.0 / (1.0 + self.decay_rate * self.iterations)
+    33
+    34         1          1.0      1.0     50.0          elif self.method == "exp_decay":
+    35                                                       k = 0.001
+    36                                                       self.learning_rate *= np.exp(-k * self.iterations)
+    37
+    38         1          0.0      0.0      0.0          elif self.method == "step_decay":
+    39                                                       drop = 0.5
+    40                                                       epoch_drop = 5.0
+    41                                                       if epoch % epoch_drop == 0 and epoch != 0:
+    42                                                           self.learning_rate *= drop
+    43
+    44         1          0.0      0.0      0.0          elif self.method == "none":
+    45         1          0.0      0.0      0.0              pass
+    46
+    47                                                   else:
+    48                                                       raise NotImplementedError
+
+Total time: 9.87396 s
+File: /home/kaliayev/Documents/ENSAE/elements_logiciels/word2vec_eltdm/word2vec_eltdm/word2vec_numpy/optimizers.py
+Function: step at line 83
+
+Line #      Hits         Time  Per Hit   % Time  Line Contents
+==============================================================
+    83                                               @profile
+    84                                               def step(self, dW1, dW2_pos, dW2_neg):
+    85      1131       1085.0      1.0      0.0          batch_size, embed_size = dW1.shape
+    86                                                   # update W1 weights
+    87      1131       1406.0      1.2      0.0          X = self.model.cache["X"]
+    88      1131    1085243.0    959.5     11.0          self.model.W1[X.squeeze(), :] -= self.learning_rate * dW1
+    89
+    90                                                   # update W2 weights for positive samples
+    91      1131       1393.0      1.2      0.0          y = self.model.cache["y"]
+    92      1131     847804.0    749.6      8.6          self.model.W2[y.squeeze(), :] -= self.learning_rate * dW2_pos
+    93
+    94                                                   # update W2 weights for negative samples
+    95      2262       2747.0      1.2      0.0          dW2_neg = dW2_neg.reshape(
+    96      1131        765.0      0.7      0.0              batch_size * self.model.cache["n_samples"], embed_size
+    97                                                   )
+    98      2262    5930087.0   2621.6     60.1          self.model.W2[self.model.cache["noise_words"], :] -= (
+    99      1131    2000852.0   1769.1     20.3              self.learning_rate * dW2_neg
+   100                                                   )
+   101
+   102      1131       2580.0      2.3      0.0          self.iterations += 1
+
+Total time: 31.0498 s
+File: /home/kaliayev/Documents/ENSAE/elements_logiciels/word2vec_eltdm/word2vec_eltdm/word2vec_numpy/utils.py
+Function: train_NSL at line 59
+
+Line #      Hits         Time  Per Hit   % Time  Line Contents
+==============================================================
+    59                                           @profile
+    60                                           def train_NSL(
+    61                                               model: NegWord2Vec,
+    62                                               train_dataloader: DataLoader,
+    63                                               criterion: NegativeSamplingLoss,
+    64                                               optimizer: OptimizeNSL,
+    65                                               n_samples: int,
+    66                                           ) -> float:
+    67         1          0.0      0.0      0.0      train_loss = 0.0
+    68      1132    1451846.0   1282.5      4.7      for i, batch in enumerate(tqdm(train_dataloader)):
+    69      1131       2506.0      2.2      0.0          model.train()
+    70      1131        596.0      0.5      0.0          X, y = batch["X"], batch["Y"]
+    71      1131     277337.0    245.2      0.9          h = model.forward_input(X)
+    72      1131     276610.0    244.6      0.9          u = model.forward_output(y)
+    73      1131    2634763.0   2329.6      8.5          noise_vector = model.forward_noise(X.shape[1], n_samples)
+    74
+    75                                                   # negative sampling loss
+    76      2262   16513174.0   7300.3     53.2          loss, grad_W1, grad_W2_pos, grad_W2_neg = criterion(
+    77      1131        393.0      0.3      0.0              model, h, u, noise_vector, y
+    78                                                   )
+    79      1131    9890736.0   8745.1     31.9          optimizer.step(grad_W1, grad_W2_pos, grad_W2_neg)
+    80
+    81      1131       1817.0      1.6      0.0          train_loss += loss
+    82
+    83         1          7.0      7.0      0.0      train_loss /= len(train_dataloader)
+    84         1          0.0      0.0      0.0      return train_loss
+
+Total time: 31.0571 s
+File: speed_tests/numpy_nsl.py
+Function: train_wrapper at line 16
+
+Line #      Hits         Time  Per Hit   % Time  Line Contents
+==============================================================
+    16                                           @profile
+    17                                           def train_wrapper(epochs, model, train_dataloader, criterion, optimizer, n_samples):
+    18         2       1219.0    609.5      0.0      for epoch in tqdm(range(epochs)):
+    19         1          6.0      6.0      0.0          print(f"###################### EPOCH {epoch} ###########################")
+    20
+    21         1   31055870.0 31055870.0    100.0          train_loss = train_NSL(model, train_dataloader, criterion, optimizer, n_samples)
+    22         1         10.0     10.0      0.0          print("Training loss:", train_loss)
+    23
+    24                                                   # update learning rate
+    25         1         24.0     24.0      0.0          optimizer.update_lr(epoch)

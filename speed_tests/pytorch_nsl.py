@@ -64,7 +64,7 @@ if __name__=="__main__":
     model.initialize_weights()
 
     criterion = NegativeSamplingLoss()
-    optimizer = optim.Adam(model.parameters(), lr=learning_rate)
+    optimizer = optim.SGD(model.parameters(), lr=learning_rate)
 
     # train for some number of epochs
     train_wrapper(epochs, model, train_dataloader, criterion, optimizer, n_samples, device)

@@ -56,7 +56,7 @@ if __name__=="__main__":
     # hyperparameters for optimizer
     epochs = 1
     decay_rate = learning_rate / epochs
-    method = "time_based"  # or "none", "exp_decay", "step_decay", "time_based"
+    method = "none"  # or "none", "exp_decay", "step_decay", "time_based"
 
     # Get our noise distribution
     word_freqs = np.array(sorted(text8_dataset.frequencies.values(), reverse=True))
