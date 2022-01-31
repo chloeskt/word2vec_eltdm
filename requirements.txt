@@ -3,3 +3,6 @@ tqdm==4.62.3
 nltk==3.6.5
 torch==1.10.0
 scikit-learn==1.0.1
+jupyterlab==3.2.8
+line-profiler==3.4.0
+matplotlib==3.5.1
