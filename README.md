@@ -36,7 +36,7 @@ python3 -m nltk.downloader stopwords
 For this project, we used the same data as in ["Parallelizing Word2Vec in Shared and Distributed Memory"](https://arxiv.org/abs/1604.04661).
 One can retrieve them by running:
 ```bash
-cd data
+mkdir data && cd data
 wget http://mattmahoney.net/dc/text8.zip -O text8.gz
 gzip -d text8.gz -f
 ```
