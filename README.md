@@ -1,3 +1,4 @@
+
 # Parallelizing Word2Vec
 
 This project is the done during the course "Éléments logiciels pour le traitement des données massives" given by [Xavier Dupré](http://www.xavierdupre.fr/)
@@ -21,6 +22,9 @@ The code was run and tested in Python 3.8.
 ````python
 pip install -r requirements.txt
 ````
+
+This will install Pytorch CPU version. To get the CUDA available version, you must follow the official documentation which can
+be found [here](https://pytorch.org/get-started/locally/) to install the compatible version with your hardware.
 
 To download files relevant for our word2vec.
 ```
