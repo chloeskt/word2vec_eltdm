@@ -2,14 +2,21 @@ import numpy as np
 import sys
 from tqdm import tqdm
 
-sys.path.append('/home/kaliayev/Documents/ENSAE/elements_logiciels/word2vec_eltdm')
+sys.path.append("/home/kaliayev/Documents/ENSAE/elements_logiciels/word2vec_eltdm")
 
 from word2vec_eltdm.common import (
-    Tokenizer, VocabCreator, DataLoader, TokenCleaner,
-    Preprocessor, Subsampler
+    Tokenizer,
+    VocabCreator,
+    DataLoader,
+    TokenCleaner,
+    Preprocessor,
+    Subsampler,
 )
 from word2vec_eltdm.word2vec_numpy import (
-    NegWord2Vec, NegativeSamplingLoss, OptimizeNSL, train_NSL,
+    NegWord2Vec,
+    NegativeSamplingLoss,
+    OptimizeNSL,
+    train_NSL,
 )
 
 
@@ -24,7 +31,8 @@ def train_wrapper(epochs, model, train_dataloader, criterion, optimizer, n_sampl
         # update learning rate
         optimizer.update_lr(epoch)
 
-if __name__=="__main__":
+
+if __name__ == "__main__":
     datapath = "/home/kaliayev/Documents/ENSAE/elements_logiciels/word2vec_eltdm/data/text8.txt"
 
     RATIO = 0.1
@@ -32,7 +40,9 @@ if __name__=="__main__":
     tokenizer = Tokenizer(datapath)
     token_cleaner = TokenCleaner(freq_threshold=5)
     vocab_creator = VocabCreator()
-    text8_dataset = Preprocessor(tokenizer, token_cleaner, vocab_creator, RATIO, return_only_train).preprocess()
+    text8_dataset = Preprocessor(
+        tokenizer, token_cleaner, vocab_creator, RATIO, return_only_train
+    ).preprocess()
 
     print("Size of our vocabulary:", len(text8_dataset.tokens_to_id))
     print("Number of tokens in our train dataset:", len(text8_dataset.train_tokens))
@@ -40,12 +50,17 @@ if __name__=="__main__":
     subsampler = Subsampler(text8_dataset.train_tokens)
     text8_dataset.train_tokens, text8_dataset.frequencies = subsampler.subsample()
 
-    print("Size of our vocabulary after subsampling of frequent words, for train:", len(text8_dataset.tokens_to_id))
+    print(
+        "Size of our vocabulary after subsampling of frequent words, for train:",
+        len(text8_dataset.tokens_to_id),
+    )
     print("Number of tokens in train dataset:", len(text8_dataset.train_tokens))
 
     window = 5
     batch_size = 256
-    train_dataloader = DataLoader(text8_dataset, text8_dataset.train_tokens, window, batch_size)
+    train_dataloader = DataLoader(
+        text8_dataset, text8_dataset.train_tokens, window, batch_size
+    )
 
     # defining the parameters
     len_vocab = len(text8_dataset.tokens_to_id)
@@ -65,10 +80,7 @@ if __name__=="__main__":
 
     # instantiate the model
     model = NegWord2Vec(
-        len_vocab,
-        embedding_size,
-        noise_dist=noise_dist,
-        best_val_loss=0.
+        len_vocab, embedding_size, noise_dist=noise_dist, best_val_loss=0.0
     )
     model.initialize_weights()
 
