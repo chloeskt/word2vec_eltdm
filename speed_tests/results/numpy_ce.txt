@@ -1,0 +1,119 @@
+Timer unit: 1e-06 s
+
+Total time: 0.097316 s
+File: /home/kaliayev/Documents/ENSAE/elements_logiciels/word2vec_eltdm/word2vec_eltdm/word2vec_numpy/losses.py
+Function: forward at line 25
+
+Line #      Hits         Time  Per Hit   % Time  Line Contents
+==============================================================
+    25                                               @profile
+    26                                               def forward(self, preds, y):
+    27      1131       2229.0      2.0      2.3          m = preds.shape[1]
+    28      2262      31657.0     14.0     32.5          return -(1 / m) * np.sum(
+    29      1131      63430.0     56.1     65.2              np.log(preds[y.flatten(), np.arange(y.shape[1])] + 0.001)
+    30                                                   )
+
+Total time: 0.03296 s
+File: /home/kaliayev/Documents/ENSAE/elements_logiciels/word2vec_eltdm/word2vec_eltdm/word2vec_numpy/losses.py
+Function: backward at line 32
+
+Line #      Hits         Time  Per Hit   % Time  Line Contents
+==============================================================
+    32                                               @profile
+    33                                               def backward(self, preds, y):
+    34      1131        736.0      0.7      2.2          m = preds.shape[1]
+    35      1131      31516.0     27.9     95.6          preds[y.flatten(), np.arange(m)] -= 1.0
+    36      1131        465.0      0.4      1.4          grad = preds
+    37      1131        243.0      0.2      0.7          return grad
+
+Total time: 515.755 s
+File: /home/kaliayev/Documents/ENSAE/elements_logiciels/word2vec_eltdm/word2vec_eltdm/word2vec_numpy/models.py
+Function: forward at line 55
+
+Line #      Hits         Time  Per Hit   % Time  Line Contents
+==============================================================
+    55                                               @profile
+    56                                               def forward(self, X):
+    57      1131       1036.0      0.9      0.0          assert self.W1 is not None, "weight matrix W1 is not initialized"
+    58      1131        762.0      0.7      0.0          assert self.W2 is not None, "weight matrix W2 is not initialized"
+    59
+    60                                                   # foward_input
+    61      1131     441687.0    390.5      0.1          h = self.W1[X.flatten(), :].T
+    62                                                   # forward output
+    63      1131   92974820.0  82205.9     18.0          u = np.dot(self.W2, h)
+    64
+    65      1131  421976595.0 373100.4     81.8          y = self.softmax(u)
+    66
+    67      1131       5334.0      4.7      0.0          self.cache["X"] = X
+    68      1131       1022.0      0.9      0.0          self.cache["h"] = h
+    69      1131     352627.0    311.8      0.1          self.cache["logits"] = u
+    70
+    71      1131        916.0      0.8      0.0          return y
+
+Total time: 153.738 s
+File: /home/kaliayev/Documents/ENSAE/elements_logiciels/word2vec_eltdm/word2vec_eltdm/word2vec_numpy/models.py
+Function: backward at line 79
+
+Line #      Hits         Time  Per Hit   % Time  Line Contents
+==============================================================
+    79                                               @profile
+    80                                               def backward(self, grad_softmax):
+    81      1131   99482113.0  87959.4     64.7          dW2 = (1 / self.cache["h"].shape[1]) * np.dot(grad_softmax, self.cache["h"].T)
+    82      1131   54253147.0  47969.2     35.3          dW1 = np.dot(self.W2.T, grad_softmax)
+    83      1131       2767.0      2.4      0.0          return dW1, dW2
+
+Total time: 12.6133 s
+File: /home/kaliayev/Documents/ENSAE/elements_logiciels/word2vec_eltdm/word2vec_eltdm/word2vec_numpy/optimizers.py
+Function: step at line 22
+
+Line #      Hits         Time  Per Hit   % Time  Line Contents
+==============================================================
+    22                                               @profile
+    23                                               def step(self, dW1, dW2):
+    24      1131    2187401.0   1934.0     17.3          self.model.W1[self.model.cache["X"].flatten(), :] -= self.learning_rate * dW1.T
+    25      1131   10421403.0   9214.3     82.6          self.model.W2 -= self.learning_rate * dW2
+    26
+    27      1131       4522.0      4.0      0.0          self.iterations += 1
+
+Total time: 686.024 s
+File: /home/kaliayev/Documents/ENSAE/elements_logiciels/word2vec_eltdm/word2vec_eltdm/word2vec_numpy/utils.py
+Function: train_default at line 16
+
+Line #      Hits         Time  Per Hit   % Time  Line Contents
+==============================================================
+    16                                           @profile
+    17                                           def train_default(
+    18                                               model: SimpleWord2Vec,
+    19                                               train_dataloader: DataLoader,
+    20                                               criterion: CrossEntropy,
+    21                                               optimizer: Optimizer,
+    22                                           ) -> float:
+    23         1          0.0      0.0      0.0      train_loss = 0.0
+    24      1132    3127424.0   2762.7      0.5      for i, batch in enumerate(tqdm(train_dataloader)):
+    25      1131       4008.0      3.5      0.0          model.train()
+    26      1131       1749.0      1.5      0.0          X, y = batch["X"], batch["Y"]
+    27      1131  515774234.0 456033.8     75.2          preds = model.forward(X)
+    28      1131     106481.0     94.1      0.0          loss = criterion.forward(preds, y)
+    29      1131     403599.0    356.9      0.1          dy = criterion.backward(preds, y)
+    30      1131  153968577.0 136134.9     22.4          dW1, dW2 = model.backward(dy)
+    31      1131   12633453.0  11170.2      1.8          optimizer.step(dW1, dW2)
+    32      1131       2706.0      2.4      0.0          train_loss += loss
+    33
+    34      1131       2138.0      1.9      0.0          if i % 1500 == 0:
+    35         1         37.0     37.0      0.0              print("Current Training Loss {:.6}".format(loss))
+    36
+    37         1          9.0      9.0      0.0      train_loss /= len(train_dataloader)
+    38         1          0.0      0.0      0.0      return train_loss
+
+Total time: 686.035 s
+File: speed_tests/numpy_ce.py
+Function: train_wrapper at line 15
+
+Line #      Hits         Time  Per Hit   % Time  Line Contents
+==============================================================
+    15                                           @profile
+    16                                           def train_wrapper(epochs, model, train_dataloader, criterion, optimizer):
+    17         2       1558.0    779.0      0.0      for epoch in tqdm(range(epochs)):
+    18         1          5.0      5.0      0.0          print(f"###################### EPOCH {epoch} ###########################")
+    19         1  686033397.0 686033397.0    100.0          train_loss = train_default(model, train_dataloader, criterion, optimizer)
+    20         1         45.0     45.0      0.0          print("Training loss:", train_loss)

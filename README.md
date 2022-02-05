@@ -1,3 +1,4 @@
+
 # Parallelizing Word2Vec
 
 This project is the done during the course "Éléments logiciels pour le traitement des données massives" given by [Xavier Dupré](http://www.xavierdupre.fr/)
@@ -22,6 +23,9 @@ The code was run and tested in Python 3.8.
 pip install -r requirements.txt
 ````
 
+This will install Pytorch CPU version. To get the CUDA available version, you must follow the official documentation which can
+be found [here](https://pytorch.org/get-started/locally/) to install the compatible version with your hardware.
+
 To download files relevant for our word2vec.
 ```
 python3 -m nltk.downloader stopwords
@@ -32,7 +36,7 @@ python3 -m nltk.downloader stopwords
 For this project, we used the same data as in ["Parallelizing Word2Vec in Shared and Distributed Memory"](https://arxiv.org/abs/1604.04661).
 One can retrieve them by running:
 ```bash
-cd data
+mkdir data && cd data
 wget http://mattmahoney.net/dc/text8.zip -O text8.gz
 gzip -d text8.gz -f
 ```

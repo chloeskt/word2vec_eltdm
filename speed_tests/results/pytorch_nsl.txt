@@ -1,0 +1,130 @@
+Timer unit: 1e-06 s
+
+Total time: 0.154437 s
+File: /home/kaliayev/Documents/ENSAE/elements_logiciels/word2vec_eltdm/word2vec_eltdm/word2vec_accelerated/losses.py
+Function: forward at line 9
+
+Line #      Hits         Time  Per Hit   % Time  Line Contents
+==============================================================
+     9                                               @staticmethod
+    10                                               @profile
+    11                                               def forward(
+    12                                                   input_vector: torch.Tensor,
+    13                                                   output_vector: torch.Tensor,
+    14                                                   noise_vectors: torch.Tensor,
+    15                                               ) -> float:
+    16      1131       1434.0      1.3      0.9          batch_size, embed_size = input_vector.shape
+    17
+    18      1131       3418.0      3.0      2.2          input_vector = input_vector.view(batch_size, embed_size, 1)
+    19
+    20      1131       1890.0      1.7      1.2          output_vector = output_vector.view(batch_size, 1, embed_size)
+    21
+    22      1131      50574.0     44.7     32.7          out_loss = torch.bmm(output_vector, input_vector).sigmoid().log()
+    23      1131       5326.0      4.7      3.4          out_loss = out_loss.squeeze()
+    24
+    25      1131      41908.0     37.1     27.1          noise_loss = torch.bmm(noise_vectors.neg(), input_vector).sigmoid().log()
+    26      1131      18303.0     16.2     11.9          noise_loss = noise_loss.squeeze().sum(1)
+    27
+    28      1131      31584.0     27.9     20.5          return -(out_loss + noise_loss).mean()
+
+Total time: 0.035377 s
+File: /home/kaliayev/Documents/ENSAE/elements_logiciels/word2vec_eltdm/word2vec_eltdm/word2vec_accelerated/models.py
+Function: forward_input at line 78
+
+Line #      Hits         Time  Per Hit   % Time  Line Contents
+==============================================================
+    78                                               @profile
+    79                                               def forward_input(self, x: torch.Tensor) -> torch.Tensor:
+    80      1131      34857.0     30.8     98.5          x = self.embedding_input(x)
+    81      1131        520.0      0.5      1.5          return x
+
+Total time: 0.023661 s
+File: /home/kaliayev/Documents/ENSAE/elements_logiciels/word2vec_eltdm/word2vec_eltdm/word2vec_accelerated/models.py
+Function: forward_output at line 83
+
+Line #      Hits         Time  Per Hit   % Time  Line Contents
+==============================================================
+    83                                               @profile
+    84                                               def forward_output(self, y: torch.Tensor) -> torch.Tensor:
+    85      1131      23249.0     20.6     98.3          out = self.embedding_output(y)
+    86      1131        412.0      0.4      1.7          return out
+
+Total time: 0.648567 s
+File: /home/kaliayev/Documents/ENSAE/elements_logiciels/word2vec_eltdm/word2vec_eltdm/word2vec_accelerated/models.py
+Function: forward_noise at line 88
+
+Line #      Hits         Time  Per Hit   % Time  Line Contents
+==============================================================
+    88                                               @profile
+    89                                               def forward_noise(self, batch_size: int, n_samples: int) -> torch.Tensor:
+    90      1131        517.0      0.5      0.1          if self.noise_dist is None:
+    91                                                       noise_dist = torch.ones(self.vocab_size)
+    92                                                   else:
+    93      1131        349.0      0.3      0.1              noise_dist = self.noise_dist
+    94
+    95      1131      17959.0     15.9      2.8          noise_dist = torch.tensor(noise_dist)
+    96      2262     561966.0    248.4     86.6          noise_words = torch.multinomial(
+    97      1131        461.0      0.4      0.1              noise_dist, batch_size * n_samples, replacement=True
+    98                                                   )
+    99
+   100      1131      30042.0     26.6      4.6          noise_words = noise_words.to(self.device)
+   101      2262      36200.0     16.0      5.6          noise_vector = self.embedding_output(noise_words).view(
+   102      1131        754.0      0.7      0.1              batch_size, n_samples, self.embedding_dim
+   103                                                   )
+   104      1131        319.0      0.3      0.0          return noise_vector
+
+Total time: 3.15504 s
+File: /home/kaliayev/Documents/ENSAE/elements_logiciels/word2vec_eltdm/word2vec_eltdm/word2vec_accelerated/utils.py
+Function: train_NSL at line 40
+
+Line #      Hits         Time  Per Hit   % Time  Line Contents
+==============================================================
+    40                                           @profile
+    41                                           def train_NSL(
+    42                                               model: PytorchNegWord2Vec,
+    43                                               train_dataloader: DataLoader,
+    44                                               criterion: NegativeSamplingLoss,
+    45                                               optimizer: torch.optim.Optimizer,
+    46                                               n_samples: int,
+    47                                               device: str = "cpu",
+    48                                           ) -> float:
+    49         1          0.0      0.0      0.0      train_loss = 0.0
+    50         1         57.0     57.0      0.0      model.to(device)
+    51      1132    1302572.0   1150.7     41.3      for i, batch in enumerate(tqdm(train_dataloader)):
+    52      1131      24887.0     22.0      0.8          model.train()
+    53      1131      49593.0     43.8      1.6          optimizer.zero_grad()
+    54
+    55      1131       4589.0      4.1      0.1          X, y = batch["X"].squeeze(), batch["Y"].squeeze()
+    56      1131      11094.0      9.8      0.4          X, y = torch.LongTensor(X), torch.LongTensor(y)
+    57      1131      63453.0     56.1      2.0          X, y = X.to(device), y.to(device)
+    58
+    59      1131      41960.0     37.1      1.3          h = model.forward_input(X)
+    60      1131      28490.0     25.2      0.9          u = model.forward_output(y)
+    61      1131     659868.0    583.4     20.9          noise_vector = model.forward_noise(X.shape[0], n_samples)
+    62
+    63                                                   # negative sampling loss
+    64      1131     168589.0    149.1      5.3          loss = criterion(h, u, noise_vector)
+    65      1131     702960.0    621.5     22.3          loss.backward()
+    66      1131      84553.0     74.8      2.7          optimizer.step()
+    67
+    68      1131      11107.0      9.8      0.4          train_loss += loss
+    69
+    70      1131        936.0      0.8      0.0          if i % 1500 == 0:
+    71         1        258.0    258.0      0.0              print("Current Training Loss {:.6}".format(loss))
+    72
+    73         1         76.0     76.0      0.0      train_loss /= len(train_dataloader)
+    74         1          0.0      0.0      0.0      return train_loss
+
+Total time: 3.16377 s
+File: speed_tests/pytorch_nsl.py
+Function: train_wrapper at line 14
+
+Line #      Hits         Time  Per Hit   % Time  Line Contents
+==============================================================
+    14                                           @profile
+    15                                           def train_wrapper(epochs, model, train_dataloader, criterion, optimizer, n_samples, device):
+    16         2       1189.0    594.5      0.0      for epoch in tqdm(range(epochs)):
+    17         1          6.0      6.0      0.0          print(f"###################### EPOCH {epoch} ###########################")
+    18         1    3162421.0 3162421.0    100.0          train_loss = train_NSL(model, train_dataloader, criterion, optimizer, n_samples, device)
+    19         1        152.0    152.0      0.0          print("Training loss:", train_loss.item())
+

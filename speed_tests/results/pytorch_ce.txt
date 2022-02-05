@@ -1,0 +1,62 @@
+Timer unit: 1e-06 s
+
+Total time: 32.2901 s
+File: /home/kaliayev/Documents/ENSAE/elements_logiciels/word2vec_eltdm/word2vec_eltdm/word2vec_accelerated/models.py
+Function: forward at line 27
+
+Line #      Hits         Time  Per Hit   % Time  Line Contents
+==============================================================
+    27                                               @profile
+    28                                               def forward(self, x):
+    29      1131     176474.0    156.0      0.5          x = self.embedding(x)
+    30      1131   24174542.0  21374.5     74.9          x = self.linear(x)
+    31      1131    7937242.0   7017.9     24.6          out = F.softmax(x, dim=1)
+    32      1131       1874.0      1.7      0.0          return out
+
+Total time: 143.771 s
+File: /home/kaliayev/Documents/ENSAE/elements_logiciels/word2vec_eltdm/word2vec_eltdm/word2vec_accelerated/utils.py
+Function: train_default at line 11
+
+Line #      Hits         Time  Per Hit   % Time  Line Contents
+==============================================================
+    11                                           @profile
+    12                                           def train_default(
+    13                                               model: PytorchSimpleWord2Vec,
+    14                                               train_dataloader: DataLoader,
+    15                                               criterion: nn.CrossEntropyLoss,
+    16                                               optimizer: optim.Optimizer,
+    17                                               device: str = "cpu",
+    18                                           ) -> float:
+    19         1          0.0      0.0      0.0      train_loss = 0.0
+    20         1      12093.0  12093.0      0.0      model.to(device)
+    21      1132    1797787.0   1588.2      1.3      for i, batch in enumerate(tqdm(train_dataloader)):
+    22      1131      36981.0     32.7      0.0          model.train()
+    23      1131    2265100.0   2002.7      1.6          optimizer.zero_grad()
+    24      1131       6401.0      5.7      0.0          X, y = batch["X"].squeeze(), batch["Y"].squeeze()
+    25      1131      42459.0     37.5      0.0          X, y = torch.tensor(X).to(device), torch.LongTensor(y).to(device)
+    26      1131   34831781.0  30797.3     24.2          preds = model.forward(X)
+    27      1131   13126273.0  11605.9      9.1          loss = criterion(preds, y)
+    28
+    29      1131   87795292.0  77626.3     61.1          loss.backward()
+    30      1131    3843707.0   3398.5      2.7          optimizer.step()
+    31
+    32      1131      12247.0     10.8      0.0          train_loss += loss
+    33
+    34      1131       1200.0      1.1      0.0          if i % 1500 == 0:
+    35         1         38.0     38.0      0.0              print("Current Training Loss {:.6}".format(loss))
+    36
+    37         1         72.0     72.0      0.0      train_loss /= len(train_dataloader)
+    38         1          1.0      1.0      0.0      return train_loss
+
+Total time: 143.783 s
+File: speed_tests/pytorch_ce.py
+Function: train_wrapper at line 13
+
+Line #      Hits         Time  Per Hit   % Time  Line Contents
+==============================================================
+    13                                           @profile
+    14                                           def train_wrapper(epochs, model, train_dataloader, criterion, optimizer):
+    15         2       1137.0    568.5      0.0      for epoch in tqdm(range(epochs)):
+    16         1          6.0      6.0      0.0          print(f"###################### EPOCH {epoch} ###########################")
+    17         1  143781538.0 143781538.0    100.0          train_loss = train_default(model, train_dataloader, criterion, optimizer)
+    18         1         14.0     14.0      0.0          print("Training loss:", train_loss.item())
