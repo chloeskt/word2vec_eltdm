@@ -52,6 +52,24 @@ rm -rf 1-billion-word-language-modeling-benchmark-r13output
 
 The previous code has been taken from Ji et al. work and can be found in the corresponding [repository](https://github.com/IntelLabs/pWord2Vec/tree/master/data).
 
+## About the structure of the project
+
+#### `word2vec_eltdm` folder:
+
+It contains all the source code divided in 3 main sub-folders:
+- ``common``: common source code between the Numpy implementation and the Pytorch one.
+- ``word2vec_accelerated``: Pytorch version of the models
+- ``word2vec_numpy``: Numpy version of the models
+
+#### ``notebooks`` folder:
+
+Contains some notebooks to see model training and evaluation. 
+
+#### ``speed_tests`` folder:
+
+Contains the source code related to training speed evaluation. The sub-folder ``results`` contains the results of these
+training speed tests.
+
 ## References
 
 ["Parallelizing Word2Vec in Shared and Distributed Memory"](https://arxiv.org/abs/1604.04661) by Ji. et al.
