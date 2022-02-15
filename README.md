@@ -4,6 +4,8 @@
 This project is the done during the course "Éléments logiciels pour le traitement des données massives" given by [Xavier Dupré](http://www.xavierdupre.fr/)
 and [Matthieu Durut](https://www.linkedin.com/in/matthieudurut) at ENSAE ParisTech. 
 
+Final grade: 18/20
+
 ## About this project
 
 The idea is to implement a naïve version (using continuous Skip-gram) of the [Word2Vec algorithm](https://arxiv.org/abs/1301.3781) developed by Mikolov et al.
